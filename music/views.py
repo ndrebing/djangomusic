@@ -7,6 +7,7 @@ from django.utils import timezone
 import re
 from django.http import JsonResponse
 import logging
+from django.db.utils import IntegrityError
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ def add_youtube_url(request):
         try:
             p.save()
         except:
-            #logger.error('Saving failed')
+            logger.error('Saving failed')
             data = {
                 'is_added': False,
                 'success': False,
