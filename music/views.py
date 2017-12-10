@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
 from .models import PlaylistItem, ConfigItem
 from django.template import loader
-from .forms import AddItemForm
+from .forms import SignUpForm
 from django.utils import timezone
 import re
 from django.http import JsonResponse
@@ -90,6 +90,9 @@ def add_youtube_url(request):
         return HttpResponse("You are doing it wrong")
 
 def index(request):
+    return HttpResponse("Signup")
+
+def play_music(request):
     addItemForm = AddItemForm()
     playlist_items = PlaylistItem.objects.order_by('-date_added')
     template = loader.get_template('music/index.html')

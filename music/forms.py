@@ -1,8 +1,5 @@
 from django import forms
 
-class AddItemForm(forms.Form):
-    link = forms.CharField(label='Link', max_length=100)
-
-class AddConfigForm(forms.Form):
-    shuffle = forms.BooleanField(label = 'Shuffle', initial=False)
-    repeat = forms.BooleanField(label = 'Repeat', initial=False)
+class SignUpForm(forms.Form):
+    username = forms.CharField(label='username', max_length=100)
+    passwort = forms.CharField(label='passwort', max_length=100)
