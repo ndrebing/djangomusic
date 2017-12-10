@@ -90,15 +90,26 @@ def add_youtube_url(request):
         return HttpResponse("You are doing it wrong")
 
 def index(request):
-    return HttpResponse("Signup")
+    if request.user.is_authenticated:
+        return HttpResponseRedirect("play_music")
+    else:
+        return HttpResponse("Signup")
+
 
 def play_music(request):
-    playlist_items = PlaylistItem.objects.order_by('-date_added')
-    template = loader.get_template('music/index.html')
-    context = {
-        'playlist_items': playlist_items,
-    }
-    return HttpResponse(template.render(context, request))
+    if request.user.is_authenticated:
+        playlist_items = PlaylistItem.objects.order_by('-date_added')
+        template = loader.get_template('music/index.html')
+        context = {
+            'playlist_items': playlist_items,
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect(".")
+
 
 def detail(request, playlistitem_id):
-    return HttpResponse("Title %s." % PlaylistItem.objects.get(id=playlistitem_id).youtube_id)
+    if request.user.is_authenticated:
+        return HttpResponse("Title %s." % PlaylistItem.objects.get(id=playlistitem_id).youtube_id)
+    else:
+        return HttpResponseRedirect(".")
