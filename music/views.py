@@ -17,6 +17,7 @@ def add_youtube_url(request):
         except:
             data = {
                 'is_added': False,
+                'success': False,
                 'youtube_id': 0
             }
             return JsonResponse(data)
@@ -28,6 +29,7 @@ def add_youtube_url(request):
         except:
             data = {
                 'is_added': False,
+                'success': False,
                 'youtube_id': youtube_id
             }
             return JsonResponse(data)
@@ -35,6 +37,7 @@ def add_youtube_url(request):
         # build data that is returned to javascript
         data = {
             'is_added': not PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(),
+            'success': True,
             'youtube_id': youtube_id
         }
         return JsonResponse(data)

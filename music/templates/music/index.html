@@ -64,16 +64,9 @@
               },
               dataType: 'json',
               success: function (data) {
-                if (!data.is_added)
+                if (!data.success)
                 {
-                  if (data.youtube_id == 0)
-                  {
-                    alert(link + " is not a valid url");
-                  }
-                  else
-                  {
-                    alert(data.youtube_id + " is already in playlist");
-                  }
+                  alert("Failure");
                 }
                 else
                 {
