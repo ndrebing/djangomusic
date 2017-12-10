@@ -10,6 +10,7 @@ import logging
 from django.db.utils import IntegrityError
 import sqlite3
 from urllib.parse import urlparse
+from django.contrib.auth import authenticate, login
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -89,6 +90,17 @@ def add_youtube_url(request):
     else:
         return HttpResponse("You are doing it wrong")
 
+def login_action(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return HttpResponseRedirect("/play_music")
+    else:
+        return HttpResponse("Fuck you, Cunt")
+
+
 def index(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect("/play_music")
@@ -110,6 +122,10 @@ def play_music(request):
         return HttpResponse(template.render(context, request))
     else:
         return HttpResponseRedirect(".")
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(".")
 
 def detail(request, playlistitem_id):
     if request.user.is_authenticated:
