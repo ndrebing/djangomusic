@@ -14,7 +14,7 @@ import sqlite3
 logger = logging.getLogger(__name__)
 
 def add_youtube_url(request):
-    logging.debug("Calling " + str(request))
+    logging.error("Calling " + str(request))
     if request.method == 'GET':
         link = request.GET.get('link', None)
 
@@ -31,7 +31,7 @@ def add_youtube_url(request):
             return JsonResponse(data)
 
         # Check if duplicate
-        logger.debug('PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(): ' + str(PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()))
+        logger.error('PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(): ' + str(PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()))
         if (PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()):
             data = {
                 'is_added': False,
