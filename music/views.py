@@ -9,6 +9,7 @@ from django.http import JsonResponse
 import logging
 from django.db.utils import IntegrityError
 import sqlite3
+from urllib.parse import urlparse
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -31,16 +32,20 @@ def change_config(request):
                 'success': True
             }
         return JsonResponse(data)
-	
+
 
 def add_youtube_url(request):
-    logging.error("Calling ")
     if request.method == 'GET':
         link = request.GET.get('link', None)
-
+        logger.error('link: ' + link)
+        
         # Parse given link
         try:
-            youtube_id = re.search('v=([\S]{6,16})', link).group(0)[2:]
+            youtube_id = urlparse(link).query[2:]
+            if "&" in query:
+                youtube_id = query.split("&")[0]
+            logger.error('youtube_id: ' + youtube_id)
+            #youtube_id = re.search('v=([\S]{6,16})', link).group(0)[2:]
         except:
             logger.error('Parsing of link failed2')
             data = {

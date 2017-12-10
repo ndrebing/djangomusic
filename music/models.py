@@ -1,5 +1,8 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import datetime
 
 class PlaylistItem(models.Model):
@@ -15,14 +18,19 @@ class PlaylistItem(models.Model):
         return self.last_played >= timezone.now() - datetime.timedelta(days=1)
 
 class ConfigItem(models.Model):
+    current_youtube_id = models.ForeignKey("PlaylistItem", on_delete=models.PROTECT)
     shuffle = models.BooleanField(default=False)
     repeat = models.BooleanField(default=False)
 
-class PlayState(models.Model):
-    playing_youtube_id = models.ForeignKey("PlaylistItem", on_delete=models.PROTECT)
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    player_state = models.TextField(blank=True)
 
-    # 0: Stop, 1: Play
-    play_state = models.IntegerField(default=0)
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
 
-    # 0: False, 1: True
-    shuffle = models.IntegerField(default=0)
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
