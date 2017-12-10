@@ -29,17 +29,19 @@ def add_youtube_url(request):
             }
             return JsonResponse(data)
 
-        # Add to database
-        p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
-        try:
-            p.save()
-        except sqlite3.IntegrityError:
+        # Check if duplicate
+        if (PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()):
             data = {
                 'is_added': False,
                 'success': False,
                 'youtube_id': youtube_id
             }
             return JsonResponse(data)
+
+        # Add to database
+        p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
+        p.save()
+
 
         # build data that is returned to javascript
         data = {
