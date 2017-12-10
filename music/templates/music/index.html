@@ -37,6 +37,8 @@
       <input type="submit" value="OK">
       </form>
 
+      <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();"/>
+
     </main>
     <footer></footer>
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
@@ -53,36 +55,36 @@
         console.log( $(this).val() );
       });
 
-      // Add youtube url
-      $("#id_link").change(function () {
-        var link = $(this).val();
-
-        $.ajax({
-            url: '{% url "add_youtube_url" %}',
-            data: {
-              'link': link
-            },
-            dataType: 'json',
-            success: function (data) {
-              if (!data.is_added)
-              {
-                if (data.youtube_id == 0)
+      function submitYoutubeLink() {
+          var link = $("#id_link").val();
+          $.ajax({
+              url: '{% url "add_youtube_url" %}',
+              data: {
+                'link': link
+              },
+              dataType: 'json',
+              success: function (data) {
+                if (!data.is_added)
                 {
-                  alert(link + " is not a valid url");
+                  if (data.youtube_id == 0)
+                  {
+                    alert(link + " is not a valid url");
+                  }
+                  else
+                  {
+                    alert(data.youtube_id + " is already in playlist");
+                  }
                 }
                 else
                 {
-                  alert(data.youtube_id + " is already in playlist");
+                  alert(data.youtube_id + " added to playlist!");
                 }
               }
-              else
-              {
-                alert(data.youtube_id + " added to playlist!");
-              }
-            }
-        });
+          });
+        }
 
-      });
+      // Add youtube url
+
 
     ///////////////////////////////////
     // Youtube player stuff
