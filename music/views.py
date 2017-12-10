@@ -22,7 +22,7 @@ def add_youtube_url(request):
         try:
             youtube_id = re.search('v=([\S]{6,16})', link).group(0)[2:]
         except:
-            logger.error('Parsing of link failed')
+            logger.error('Parsing of link failed2')
             data = {
                 'is_added': False,
                 'success': False,
