@@ -33,7 +33,7 @@ def add_youtube_url(request):
         try:
             p.save()
         except:
-            logger.error('Saving failed')
+            #logger.error('Saving failed')
             data = {
                 'is_added': False,
                 'success': False,
