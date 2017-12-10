@@ -26,7 +26,8 @@ def add_youtube_url(request):
         p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
         try:
             p.save()
-        except:
+        except e:
+            print("Saving failed:"+e)
             data = {
                 'is_added': False,
                 'success': False,
