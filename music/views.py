@@ -91,7 +91,7 @@ def add_youtube_url(request):
 
 def index(request):
     if request.user.is_authenticated:
-        HttpResponseRedirect("/play_music")
+        return HttpResponseRedirect("/play_music")
     else:
         form = SignUpForm()
         template = loader.get_template('music/signup.html')
