@@ -25,7 +25,7 @@ SECRET_KEY = 'v&l6vh*l^e(_948dgs917@p6#sksgen_iiv9k6y&^!j2^t35x9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['music.ndrebing.de']
+ALLOWED_HOSTS = ['music.ndrebing.de', 'localhost']
 
 
 # Application definition
