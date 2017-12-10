@@ -14,6 +14,7 @@ import sqlite3
 logger = logging.getLogger(__name__)
 
 def add_youtube_url(request):
+    logging.debug("Calling " + str(request))
     if request.method == 'GET':
         link = request.GET.get('link', None)
 
