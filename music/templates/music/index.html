@@ -1,0 +1,127 @@
+﻿{% load static %}<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}Default Title{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+    {% block stylesheet %}{% endblock %}
+  </head>
+  <body>
+    <header></header>
+    <main>
+
+      <table style="width:50%">
+        <tr>
+          <th></th>
+          <th>Playlist</th>
+        </tr>
+        <tr>
+          <td><div id="player"></div></td>
+          <td>
+            {% if playlist_items %}
+                <ul>
+                {% for item in playlist_items %}
+                    <li><a href="https://www.youtube.com/watch?v={{ item.youtube_id }}">{{ item.youtube_id }}</a></li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>Playlist is empty :(</p>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+
+      <form action="" method="post">
+      {% csrf_token %}
+      {{ addItemForm }}
+      <input type="submit" value="OK">
+      </form>
+
+    </main>
+    <footer></footer>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block javascript %}
+
+    <script>
+      ///////////////////////////////////
+      // Database interaction
+      ///////////////////////////////////
+
+      // Debug stuff
+      $("#id_link").change(function () {
+        console.log( $(this).val() );
+      });
+
+      // Add youtube url
+      $("#id_link").change(function () {
+        var link = $(this).val();
+
+        $.ajax({
+            url: '{% url "add_youtube_url" %}',
+            data: {
+              'link': link
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (!data.is_added)
+              {
+                if (data.youtube_id == 0)
+                {
+                  alert(link + " is not a valid url");
+                }
+                else
+                {
+                  alert(data.youtube_id + " is already in playlist");
+                }
+              }
+              else
+              {
+                alert(data.youtube_id + " added to playlist!");
+              }
+            }
+        });
+
+      });
+
+    ///////////////////////////////////
+    // Youtube player stuff
+    ///////////////////////////////////
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      var player;
+      function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '360',
+          width: '640',
+          videoId: 'M7lc1UVf-VE',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      function onPlayerReady(event) {
+        event.target.playVideo();
+      }
+
+      var done = false;
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING && !done) {
+          setTimeout(stopVideo, 6000);
+          done = true;
+        }
+      }
+      function stopVideo() {
+        player.stopVideo();
+      }
+    </script>
+
+    {% endblock %}
+  </body>
+</html>
