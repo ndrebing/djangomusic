@@ -9,7 +9,7 @@ from django.http import JsonResponse
 import logging
 
 # Get an instance of a logger
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(filename='view.log')
 
 def add_youtube_url(request):
     if request.method == 'GET':
