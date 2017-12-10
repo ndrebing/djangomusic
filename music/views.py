@@ -106,4 +106,7 @@ def play_music(request):
     return HttpResponse(template.render(context, request))
 
 def detail(request, playlistitem_id):
-    return HttpResponse("Title %s." % PlaylistItem.objects.get(id=playlistitem_id).youtube_id)
+    if request.user.is_authenticated:
+        return HttpResponse("Title %s." % PlaylistItem.objects.get(id=playlistitem_id).youtube_id)
+    else:
+        return HttpResponseRedirect(".")
