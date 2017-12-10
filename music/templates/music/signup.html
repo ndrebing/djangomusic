@@ -1,0 +1,21 @@
+﻿{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'music_css/music.css' %}" />
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}Default Title{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
+    {% block stylesheet %}{% endblock %}
+  </head>
+  <body>
+    <header></header>
+       <form action="/music/play_music.html" method="post">
+           {% csrf_token %}
+           {{ SignUpForm }}
+           <input type="submit" value="OK">  
+      </form>
+  </body>
+</html>

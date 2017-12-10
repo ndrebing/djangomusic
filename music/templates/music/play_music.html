@@ -1,4 +1,8 @@
-﻿{% load static %}<!doctype html>
+﻿{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'music_css/music.css' %}" />
+
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -15,18 +19,20 @@
           <th>Playlist</th>
         </tr>
         <tr>
-          <td><div id="player"></div></td>
-          <td>
-            {% if playlist_items %}
-                <ul>
-                {% for item in playlist_items %}
-                    <li><a href="https://www.youtube.com/watch?v={{ item.youtube_id }}">{{ item.youtube_id }}</a></li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p>Playlist is empty :(</p>
-            {% endif %}
-          </td>
+          <p class="cunt">
+              <td><div id="player"></div></td>
+              <td>
+                {% if playlist_items %}
+                    <ul>
+                    {% for item in playlist_items %}
+                        <li><a href="https://www.youtube.com/watch?v={{ item.youtube_id }}">{{ item.youtube_id }}</a></li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Playlist is empty :(</p>
+                {% endif %}
+              </td>
+          </p>
         </tr>
       </table>
 

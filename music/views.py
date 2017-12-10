@@ -90,11 +90,16 @@ def add_youtube_url(request):
         return HttpResponse("You are doing it wrong")
 
 def index(request):
-    return HttpResponse("Signup")
+    form = SignUpForm()
+    template = loader.get_template('music/signup.html')
+    context = {
+        'SignUpForm': form,
+    }
+    return HttpResponse(template.render(context, request))
 
 def play_music(request):
     playlist_items = PlaylistItem.objects.order_by('-date_added')
-    template = loader.get_template('music/index.html')
+    template = loader.get_template('music/play_music.html')
     context = {
         'playlist_items': playlist_items,
     }
