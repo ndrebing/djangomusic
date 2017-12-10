@@ -30,6 +30,7 @@ def add_youtube_url(request):
             return JsonResponse(data)
 
         # Check if duplicate
+        logger.debug('PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(): ' + str(PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()))
         if (PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()):
             data = {
                 'is_added': False,
