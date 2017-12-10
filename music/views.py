@@ -38,12 +38,12 @@ def add_youtube_url(request):
     if request.method == 'GET':
         link = request.GET.get('link', None)
         logger.error('link: ' + link)
-        
+
         # Parse given link
         try:
             youtube_id = urlparse(link).query[2:]
             if "&" in query:
-                youtube_id = query.split("&")[0]
+                youtube_id = youtube_id.split("&")[0]
             logger.error('youtube_id: ' + youtube_id)
             #youtube_id = re.search('v=([\S]{6,16})', link).group(0)[2:]
         except:
