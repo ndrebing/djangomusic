@@ -6,6 +6,10 @@ from .forms import AddItemForm
 from django.utils import timezone
 import re
 from django.http import JsonResponse
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 def add_youtube_url(request):
     if request.method == 'GET':
@@ -23,11 +27,12 @@ def add_youtube_url(request):
             return JsonResponse(data)
 
         # Add to database
+
         p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
         try:
             p.save()
-        except e:
-            print("Saving failed:"+e)
+        except:
+            logger.error('Something went wrong!')
             data = {
                 'is_added': False,
                 'success': False,
