@@ -42,7 +42,6 @@ def add_youtube_url(request):
         p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
         p.save()
 
-
         # build data that is returned to javascript
         data = {
             'is_added': not PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(),
