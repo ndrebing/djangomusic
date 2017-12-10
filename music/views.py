@@ -93,12 +93,10 @@ def index(request):
     return HttpResponse("Signup")
 
 def play_music(request):
-    addItemForm = AddItemForm()
     playlist_items = PlaylistItem.objects.order_by('-date_added')
     template = loader.get_template('music/index.html')
     context = {
         'playlist_items': playlist_items,
-        'addItemForm': addItemForm
     }
     return HttpResponse(template.render(context, request))
 
