@@ -32,7 +32,8 @@
       </table>
 
       <input type="text", id="id_link">
-      <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();"/>
+      <input type="button" value="Submit link" onclick="submitYoutubeLink();"/>
+      <input type="button" value="Vote skip" onclick="voteSkip();"/>
 
     </main>
     <footer></footer>
@@ -49,6 +50,10 @@
       $("#id_link").change(function () {
         console.log( $(this).val() );
       });
+
+      function voteSkip() {
+        alert("Todo")
+      }
 
       function submitYoutubeLink() {
           var link = $("#id_link").val();
