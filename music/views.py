@@ -30,16 +30,16 @@ def add_youtube_url(request):
         # Add to database
 
         p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
-        try:
-            p.save()
-        except:
-            logger.error('Saving failed')
-            data = {
-                'is_added': False,
-                'success': False,
-                'youtube_id': youtube_id
-            }
-            return JsonResponse(data)
+        #try:
+        p.save()
+        #except:
+        #    logger.error('Saving failed')
+        #    data = {
+        #        'is_added': False,
+        #        'success': False,
+        #        'youtube_id': youtube_id
+        #    }
+        #    return JsonResponse(data)
 
         # build data that is returned to javascript
         data = {
