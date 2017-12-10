@@ -8,6 +8,7 @@ import re
 from django.http import JsonResponse
 import logging
 from django.db.utils import IntegrityError
+import sqlite3
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ def add_youtube_url(request):
         p = PlaylistItem(youtube_id=youtube_id, date_added=timezone.now(), date_played=timezone.now())
         try:
             p.save()
-        except:
+        except sqlite3.IntegrityError:
             data = {
                 'is_added': False,
                 'success': False,
