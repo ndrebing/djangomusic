@@ -14,6 +14,10 @@ class PlaylistItem(models.Model):
     def was_played_recently(self):
         return self.last_played >= timezone.now() - datetime.timedelta(days=1)
 
+class ConfigItem(models.Model):
+    shuffle = models.BooleanField(default=False)
+    repeat = models.BooleanField(default=False)
+
 class PlayState(models.Model):
     playing_youtube_id = models.ForeignKey("PlaylistItem", on_delete=models.PROTECT)
 

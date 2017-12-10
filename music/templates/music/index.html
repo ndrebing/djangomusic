@@ -31,9 +31,11 @@
         </tr>
       </table>
 
-      <input type="text", id="id_link">
-      <input type="button" value="Submit link" onclick="submitYoutubeLink();"/>
       <input type="button" value="Vote skip" onclick="voteSkip();"/>
+      <label>URL: <input name="URL" type="text" , id="id_link"></label>
+      <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();"/>
+      <label>Shuffle: </label><input name="Shuffle" type="checkbox", id="shuffle" onchange="pushConfig()"> </label>
+      <label>Repeat: <input name="Repeat" type="checkbox", id="repeat" onchange="pushConfig()"> </label>
 
     </main>
     <footer></footer>
@@ -75,7 +77,23 @@
                 }
               }
           });
-        }
+      }
+
+      function pushConfig() {
+          var sh = $("#shuffle").is(":checked");
+          var re = $("#repeat").is(":checked");
+          $.ajax({
+              url: '{% url "change_config" %}',
+              data: {
+                    'shuffle': sh,
+                    'repeat': re
+              },
+              dataType: 'json',
+              success: function (data) {
+                  alert("config has been changed");
+              }
+          });
+      }
 
       // Add youtube url
 

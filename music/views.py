@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import PlaylistItem
+from .models import PlaylistItem, ConfigItem
 from django.template import loader
 from .forms import AddItemForm
 from django.utils import timezone
@@ -12,6 +12,26 @@ import sqlite3
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+
+def change_config(request):
+    if request.method == 'GET':
+        shuffle_val = True if request.GET.get('shuffle', False) == "true" else False
+        repeat_val = True if request.GET.get('repeat', False) == "true" else False
+
+        d = ConfigItem(shuffle=shuffle_val, repeat=repeat_val)
+
+        try:
+            d.save()
+            data = {
+                'success': True
+            }
+            return JsonResponse(data)
+        except:
+           data = {
+                'success': True
+            }
+        return JsonResponse(data)
+	
 
 def add_youtube_url(request):
     logging.error("Calling ")
