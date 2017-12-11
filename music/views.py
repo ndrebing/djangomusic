@@ -10,11 +10,22 @@ import logging
 from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
-import .util
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
+youtube_api_key = "CO5ZIUFYwMY&key=AIzaSyBZOk4mXjHUwPQeuw8JiEic0HqD-Ji-A0k" # private, please dont share
+
+def youtube_url_validation(url):
+    youtube_regex = (
+        r'(https?://)?(www\.)?'
+        '(youtube|youtu|youtube-nocookie)\.(com|be)/'
+        '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
+
+    youtube_regex_match = re.match(youtube_regex, url)
+    if youtube_regex_match:
+        return youtube_regex_match.group(6)
+
+    return youtube_regex_match
 
 def change_config(request):
     if request.method == 'GET':
@@ -35,13 +46,25 @@ def change_config(request):
             }
         return JsonResponse(data)
 
+def get_playlist(request):
+    if request.user.is_authenticated:
+        playlist = [entry.youtube_id for entry in PlaylistItem.objects.all()]
+        logger.error(playlist)
+        data = {
+            'playlist': playlist,
+            'playlist_length': len(playlist),
+        }
+        return JsonResponse(data)
+    else:
+        return HttpResponse("You are doing it wrong")
+
 def add_youtube_url(request):
-    if request.method == 'GET':
+    if request.method == 'GET' and request.user.is_authenticated:
         link = request.GET.get('link', None)
         logger.error('link: ' + link)
         # Parse given link
         try:
-            youtube_id = util.youtube_url_validation(link)
+            youtube_id = youtube_url_validation(link)
         except:
             logger.error('Parsing of link failed')
             data = {

@@ -17,22 +17,12 @@
       <table style="width:50%">
         <tr>
           <th></th>
-          <th>Playlist</th>
+          <th><div id=PlaylistHeader></div></th>
         </tr>
         <tr>
           <p class="cunt">
               <td><div id="player"></div></td>
-              <td>
-                {% if playlist_items %}
-                    <ul>
-                    {% for item in playlist_items %}
-                        <li><a href="https://www.youtube.com/watch?v={{ item.youtube_id }}">{{ item.youtube_id }}</a></li>
-                    {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>Playlist is empty :(</p>
-                {% endif %}
-              </td>
+              <td><div id="playlist"></div></td>
           </p>
         </tr>
       </table>
@@ -63,6 +53,38 @@
         alert("Todo")
       }
 
+      var interval = 500;  // 1000 = 1 second, 3000 = 3 seconds
+      function drawPlayList() {
+        $.ajax({
+            url: '{% url "get_playlist" %}',
+            data: {},
+            dataType: 'json',
+            success: function (data) {
+              //Update PlaylistHeader
+              $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
+
+              //Update Playlist
+              var node = document.getElementById("playlist");
+              while (node.firstChild) {
+                  node.removeChild(node.firstChild);
+              }
+
+              var playlist = data.playlist
+              var list = document.createElement('ul');
+              for(var i = 0; i < playlist.length; i++) {
+                  var item = document.createElement('li');
+                  item.appendChild(document.createTextNode(playlist[i]));
+                  list.appendChild(item);
+              }
+              node.appendChild(list)
+            },
+            complete: function (data) {
+                    setTimeout(drawPlayList, interval);
+            }
+        });
+      }
+      setTimeout(drawPlayList, interval);
+
       function submitYoutubeLink() {
           var link = $("#id_link").val();
           $.ajax({
@@ -76,10 +98,6 @@
                 if (!data.success)
                 {
                   alert("Failure!");
-                }
-                else
-                {
-                  alert(data.youtube_id + " added to playlist!");
                 }
               }
           });
