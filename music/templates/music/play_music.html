@@ -125,7 +125,8 @@
               },
               dataType: 'json',
               success: function (data) {
-                  alert("config has been changed");
+                  $('#shuffle').prop("checked", data.shuffle_val);
+                  $('#repeat').prop("checked", data.repeat_val);
               }
           });
       }

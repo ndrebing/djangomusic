@@ -11,8 +11,6 @@ from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from .util import *
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -34,19 +32,20 @@ def change_config(request):
     if request.method == 'GET':
         shuffle_val = True if request.GET.get('shuffle', False) == "true" else False
         repeat_val = True if request.GET.get('repeat', False) == "true" else False
-
+        ConfigItem.objects.all().delete()
         d = ConfigItem(shuffle=shuffle_val, repeat=repeat_val)
-
+        success = False
         try:
             d.save()
-            data = {
-                'success': True
-            }
-            return JsonResponse(data)
+            success = True
         except:
-           data = {
-                'success': True
-            }
+           pass
+
+        data = {
+            'success': success,
+            'shuffle_val': shuffle_val,
+            'repeat_val': repeat_val,
+        }
         return JsonResponse(data)
 
 def get_playlist(request):
