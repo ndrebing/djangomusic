@@ -44,7 +44,7 @@ def add_youtube_url(request):
         # Parse given link
         try:
             link = link.split("&")
-            youtube_id = re.search('v=([\S]*)', link).group(0)[2:]
+            youtube_id = re.search('v=([\S]*)', link[0]).group(0)[2:]
         except:
             logger.error('Parsing of link failed')
             data = {
