@@ -80,8 +80,6 @@ def get_interface(request):
         except:
             create_database_integrity()
 
-
-        logger.error(playlist)
         data = {
             'playlist': playlist,
             'playlist_length': len(playlist),
@@ -120,10 +118,10 @@ def notify_server(request):
             shuffle = configItem.shuffle
             repeat = configItem.repeat
             current_playlistItem = configItem.current_youtube_id
-
             if not shuffle:
                 if PlaylistItem.objects.latest("id").id > current_playlistItem.id:
-                    new_id = current_playlistItem.id + 1
+                    valid_ids = [x['id'] for x in PlaylistItem.objects.order_by('date_added').values('id')]
+                    new_id = valid_ids[valid_ids.index(current_playlistItem.id) + 1]
                 else:
                     new_id = PlaylistItem.objects.order_by('date_added')[0].id
             else:
