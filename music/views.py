@@ -10,6 +10,8 @@ import logging
 from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
+import .util
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -33,16 +35,15 @@ def change_config(request):
             }
         return JsonResponse(data)
 
-
 def add_youtube_url(request):
     if request.method == 'GET':
         link = request.GET.get('link', None)
         logger.error('link: ' + link)
         # Parse given link
         try:
-            youtube_id = re.search('v=(\w[A-Za-z1-9_-]\w+)', link).group(0)[2:]
+            youtube_id = util.youtube_url_validation(link)
         except:
-            logger.error('Parsing of link failed3')
+            logger.error('Parsing of link failed')
             data = {
                 'is_added': False,
                 'success': False,
@@ -52,7 +53,7 @@ def add_youtube_url(request):
 
         # Check if duplicate
         logger.error('PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists(): ' + str(PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()))
-        if (PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()):
+        if (PlaylistItem.objects.filter(youtube_id__iexact=youtube_id).exists()) or youtube_id == None:
             data = {
                 'is_added': False,
                 'success': False,
