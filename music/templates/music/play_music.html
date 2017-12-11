@@ -75,10 +75,8 @@
               $('#repeat').prop("checked", data.repeat);
 
               var old_id = player.getVideoData()['video_id'];
-              console.log("old_id: " + old_id + ", data.current_youtube_id: " + data.youtube_id);
               if (old_id != data.youtube_id)
               {
-                console.log("loading new vid");
                 player.loadVideoById(data.youtube_id);
               }
 
