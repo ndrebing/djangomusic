@@ -92,6 +92,23 @@ def get_interface(request):
     else:
         return HttpResponse("You are doing it wrong")
 
+        
+#    -1 (nicht gestartet)
+#    0 (beendet)
+#    1 (wird wiedergegeben)
+#    2 (pausiert)
+#    3 (wird gepuffert)
+#    5 (Video positioniert)
+def notify_server(request):
+    if request.method == 'GET' and request.user.is_authenticated:
+        value = request.GET.get('status', None)
+        if value == None:
+            return HttpResponse("notification error: no status provided") 
+        if value == '0':
+            print('video done')
+            # do what you want cause a pirate is freeeee
+            #TODO: handling of cases, doing something useful with it
+
 def add_youtube_url(request):
     if request.method == 'GET' and request.user.is_authenticated:
         link = request.GET.get('link', None)

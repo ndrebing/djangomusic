@@ -148,10 +148,10 @@
           height: '360',
           width: '640',
           videoId: 'M7lc1UVf-VE',
-          playerVars: {'controls': 0 },
+          playerVars: {'controls': 1 },
           events: {
             'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+            'onStateChange': onPlayerStateChange,
           }
         });
       }
@@ -160,13 +160,21 @@
         event.target.playVideo();
       }
 
-      var done = false;
       function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING && !done) {
-          setTimeout(stopVideo, 6000);
-          done = true;
-        }
+          if (event.data == YT.PlayerState.ENDED) {
+              $.ajax({
+                  url: '{% url "notify_server" %}',
+                  data: {
+                      'status': YT.PlayerState.ENDED
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                      console.log(data);
+                  }
+              });
+          }
       }
+
       function stopVideo() {
         player.stopVideo();
       }
