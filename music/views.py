@@ -234,7 +234,7 @@ def vote_skip_action(request):
         configItem.vote_skip_list = voted_ids
         configItem.save()
 
-        if(len(voted_ids.split(';')) - 1) >= 3:
+        if(len(voted_ids.split(';')) - 1) >= 2:
             pickNextSong()
         return JsonResponse(data)
 
