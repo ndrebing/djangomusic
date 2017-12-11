@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import PlaylistItem, ConfigItem
+from .models import PlaylistItem, ConfigItem, Profile
 from django.template import loader
-from .forms import SignUpForm
+from .forms import LoginForm
 from django.utils import timezone
 import re
 from django.http import JsonResponse
@@ -10,6 +10,9 @@ import logging
 from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from .util import *
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -108,26 +111,16 @@ def add_youtube_url(request):
     else:
         return HttpResponse("You are doing it wrong")
 
-def login_action(request):
-    username = request.POST.get('username', "")
-    password = request.POST.get('password', "")
-    user = authenticate(request, username=username, password=password)
-    logger.error(user, password)
-    if user is not None:
-        login(request, user)
-        return HttpResponseRedirect("/play_music")
-    else:
-        return HttpResponse("Login failed :(")
-
-
 def index(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect("/play_music")
     else:
-        form = SignUpForm()
-        template = loader.get_template('music/signup.html')
+        loginForm = LoginForm()
+        signupForm = LoginForm()
+        template = loader.get_template('music/login.html')
         context = {
-            'SignUpForm': form,
+            'LoginForm': loginForm,
+            'SignupForm': signupForm
         }
         return HttpResponse(template.render(context, request))
 
@@ -143,9 +136,39 @@ def play_music(request):
     else:
         return HttpResponseRedirect(".")
 
+def signup_action(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")
+    data = {
+       'success': False,
+    }
+
+    if request.user.is_authenticated or username == "" or password == "" :
+        return HttpResponse("user or password empty or authenticated")
+    try:
+        new_user = User.objects.create_user(username, '', password)
+    except:
+        return HttpResponse("Username schon vergeben :(")
+    try:
+        login(request, new_user)
+        return HttpResponseRedirect("/play_music")
+    except:
+        return HttpResponse("login failed")
+
 def logout_action(request):
     logout(request)
     return HttpResponseRedirect(".")
+
+def login_action(request):
+    username = request.POST.get('username', "")
+    password = request.POST.get('password', "")
+    user = authenticate(request, username=username, password=password)
+    logger.error(user, password)
+    if user is not None:
+        login(request, user)
+        return HttpResponseRedirect("/play_music")
+    else:
+        return HttpResponse("Login failed :(")
 
 def detail(request, playlistitem_id):
     if request.user.is_authenticated:

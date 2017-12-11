@@ -1,12 +1,12 @@
 ﻿{% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'music_css/music.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'music/style.css' %}" />
 
 <!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}Default Title{% endblock %}</title>
+    <title>{% block title %}Player{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/app.css' %}">
     {% block stylesheet %}{% endblock %}
   </head>
@@ -25,13 +25,24 @@
               <td><div id="playlist"></div></td>
           </p>
         </tr>
+        <tr>
+            <td>
+                <div>
+                    <b>Config:</b>
+                    <br />
+                    <label>Shuffle: <input name="Shuffle" type="checkbox" , id="shuffle" onchange="pushConfig()"> </label>
+                    <br />
+                    <label>Repeat: <input name="Repeat" type="checkbox" , id="repeat" onchange="pushConfig()"> </label>
+                </div>
+            </td>
+            <td>
+                <label>URL: <input name="URL" type="text" , id="id_link"></label>
+                <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();" />
+            </td>
       </table>
 
-      <input type="button" value="Vote skip" onclick="voteSkip();"/>
-      <label>URL: <input name="URL" type="text" , id="id_link"></label>
-      <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();"/>
-      <label>Shuffle: </label><input name="Shuffle" type="checkbox", id="shuffle" onchange="pushConfig()"> </label>
-      <label>Repeat: <input name="Repeat" type="checkbox", id="repeat" onchange="pushConfig()"> </label>
+        <input type="button" value="Vote skip" onclick="voteSkip();"/>
+
 
     </main>
     <footer></footer>
