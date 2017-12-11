@@ -28,33 +28,65 @@ def youtube_url_validation(url):
 
     return youtube_regex_match
 
+def create_database_integrity():
+    logger.debug("create_database_integrity")
+
+    # Playlist has at least one entry
+    playlistItems = list(PlaylistItem.objects.all())
+    if len(playlistItems) <= 0:
+        p = PlaylistItem(youtube_id="g9Ttm46ASk8", date_added=timezone.now(), date_played=timezone.now())
+        p.save()
+
+    # Make sure exatcly one config item exists
+    configItems = list(ConfigItem.objects.all())
+    if len(configItems) > 1:
+        c_temp = configItems[0]
+        ConfigItem.objects.all().delete()
+        c_temp.save()
+    elif len(configItems) <= 0:
+        c_temp = ConfigItem(shuffle=False, repeat=False, current_youtube_id=playlistItems[0])
+        c_temp.save()
+
 def change_config(request):
     if request.method == 'GET':
-        shuffle_val = True if request.GET.get('shuffle', False) == "true" else False
-        repeat_val = True if request.GET.get('repeat', False) == "true" else False
-        ConfigItem.objects.all().delete()
-        d = ConfigItem(shuffle=shuffle_val, repeat=repeat_val)
-        success = False
+        shuffle = True if request.GET.get('shuffle', False) == "true" else False
+        repeat = True if request.GET.get('repeat', False) == "true" else False
+
+        # Update Database
         try:
-            d.save()
-            success = True
+            configItem = ConfigItem.objects.latest('id')
+            configItem.shuffle = shuffle
+            configItem.repeat = repeat
+            configItem.save()
         except:
-           pass
+            create_database_integrity()
+
+        # Read Database (in casecreate_database_integrity() restored default )
+        shuffle_db = ConfigItem.objects.latest('id').shuffle
+        repeat_db = ConfigItem.objects.latest('id').repeat
 
         data = {
-            'success': success,
-            'shuffle_val': shuffle_val,
-            'repeat_val': repeat_val,
+            'shuffle_val': shuffle_db,
+            'repeat_val': repeat_db,
         }
         return JsonResponse(data)
 
-def get_playlist(request):
+def get_interface(request):
     if request.user.is_authenticated:
         playlist = [entry.youtube_id for entry in PlaylistItem.objects.all()]
+
+        try:
+            configItem  = ConfigItem.objects.all()[0]
+        except:
+            create_database_integrity()
+
+
         logger.error(playlist)
         data = {
             'playlist': playlist,
             'playlist_length': len(playlist),
+            'shuffle': configItem.shuffle,
+            'repeat': configItem.repeat,
         }
         return JsonResponse(data)
     else:

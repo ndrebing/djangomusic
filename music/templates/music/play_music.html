@@ -65,14 +65,18 @@
       }
 
       var interval = 500;  // 1000 = 1 second, 3000 = 3 seconds
-      function drawPlayList() {
+      function updateInterface() {
         $.ajax({
-            url: '{% url "get_playlist" %}',
+            url: '{% url "get_interface" %}',
             data: {},
             dataType: 'json',
             success: function (data) {
-              //Update PlaylistHeader
+              console.log(data);
+
+              //Update Interface
               $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
+              $('#shuffle').prop("checked", data.shuffle);
+              $('#repeat').prop("checked", data.repeat);
 
               //Update Playlist
               var node = document.getElementById("playlist");
@@ -90,11 +94,11 @@
               node.appendChild(list)
             },
             complete: function (data) {
-                    setTimeout(drawPlayList, interval);
+                    setTimeout(updateInterface, interval);
             }
         });
       }
-      setTimeout(drawPlayList, interval);
+      setTimeout(updateInterface, interval);
 
       function submitYoutubeLink() {
           var link = $("#id_link").val();
@@ -124,10 +128,7 @@
                     'repeat': re
               },
               dataType: 'json',
-              success: function (data) {
-                  $('#shuffle').prop("checked", data.shuffle_val);
-                  $('#repeat').prop("checked", data.repeat_val);
-              }
+              success: function (data) {}
           });
       }
 
