@@ -91,10 +91,6 @@ def add_youtube_url(request):
         return HttpResponse("You are doing it wrong")
 
 def login_action(request):
-    logout(request)
-    return HttpResponseRedirect('.')
-
-def login_action(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")
     user = authenticate(request, username=username, password=password)
@@ -126,7 +122,7 @@ def play_music(request):
     else:
         return HttpResponseRedirect(".")
 
-def logout_view(request):
+def logout_action(request):
     logout(request)
     return HttpResponseRedirect(".")
 
