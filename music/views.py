@@ -38,16 +38,10 @@ def change_config(request):
 def add_youtube_url(request):
     if request.method == 'GET':
         link = request.GET.get('link', None)
-
         logger.error('link: ' + link)
-
         # Parse given link
         try:
-            logger.error('Parsing: ' + link)
-            link = link.split("&")
-            logger.error('Parsing: ' + str(link))
-            youtube_id = re.search('v=([\S]*)', link[0]).group(0)[2:]
-            logger.error('youtube_id: ' + str(youtube_id))
+            youtube_id = re.search('v=(\w[A-Za-z1-9_]\w+)', link).group(0)[2:]
         except:
             logger.error('Parsing of link failed')
             data = {
