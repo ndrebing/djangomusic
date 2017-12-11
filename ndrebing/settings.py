@@ -124,6 +124,8 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ( os.path.join('static'), )
 
+# SESSION EXPIRE
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
