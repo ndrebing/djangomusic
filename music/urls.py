@@ -12,4 +12,5 @@ urlpatterns = [
     path('ajax/add_youtube_url/', views.add_youtube_url, name='add_youtube_url'),
     path('ajax/change_config/', views.change_config, name='change_config'),
     path('ajax/get_interface/', views.get_interface, name='get_interface'),
+    path('ajax/notify_server/', views.notify_server, name='notify_server'),
 ]
