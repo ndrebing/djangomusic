@@ -12,10 +12,10 @@
   </head>
   <body>
     <header></header>
-       <form action="/login_action" method="post">
+       <form action="/login" method="post">
            {% csrf_token %}
            {{ SignUpForm }}
-           <input type="submit" value="OK">  
+           <input type="submit" value="OK">
       </form>
   </body>
 </html>
