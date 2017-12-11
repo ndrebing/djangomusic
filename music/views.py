@@ -11,6 +11,7 @@ from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+import random
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ def get_interface(request):
     else:
         return HttpResponse("You are doing it wrong")
 
-        
+
 #    -1 (nicht gestartet)
 #    0 (beendet)
 #    1 (wird wiedergegeben)
@@ -102,12 +103,46 @@ def get_interface(request):
 def notify_server(request):
     if request.method == 'GET' and request.user.is_authenticated:
         value = request.GET.get('status', None)
+
+        print("NOTIFICATON", value)
         if value == None:
-            return HttpResponse("notification error: no status provided") 
-        if value == '0':
-            print('video done')
+            return HttpResponse("notification error: no status provided")
+        elif value == '-1':
+            new_id = random.sample(range(PlaylistItem.objects.latest("id").id),1)
+            configItem = ConfigItem.objects.latest('id')
+            configItem.current_youtube_id = PlaylistItem.objects.get(id=new_id)
+            configItem.save()
+
+        elif value == '0':
             # do what you want cause a pirate is freeeee
             #TODO: handling of cases, doing something useful with it
+            configItem = ConfigItem.objects.latest('id')
+            shuffle = configItem.shuffle
+            repeat = configItem.repeat
+            current_playlistItem = configItem.current_youtube_id
+
+            if not shuffle:
+                if PlaylistItem.objects.latest("id").id > current_playlistItem.id:
+                    new_id = current_playlistItem.id + 1
+                else:
+                    new_id = PlaylistItem.objects.order_by('date_added')[0].id
+            else:
+                while True:
+                    valid_ids = [x['id'] for x in PlaylistItem.objects.values('id')]
+                    new_id = random.sample(valid_ids,1)[0]
+                    print(new_id, current_playlistItem.id)
+                    if new_id != current_playlistItem.id:
+                        break
+            try:
+                configItem.current_youtube_id = PlaylistItem.objects.get(id=new_id)
+                configItem.save()
+            except:
+                create_database_integrity()
+
+
+
+
+
 
 def add_youtube_url(request):
     if request.method == 'GET' and request.user.is_authenticated:
