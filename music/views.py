@@ -74,7 +74,6 @@ def change_config(request):
 def get_interface(request):
     if request.user.is_authenticated:
         playlist = [entry.youtube_id for entry in PlaylistItem.objects.all()]
-
         try:
             configItem  = ConfigItem.objects.all()[0]
         except:
@@ -87,6 +86,7 @@ def get_interface(request):
             'playlist_length': len(playlist),
             'shuffle': configItem.shuffle,
             'repeat': configItem.repeat,
+            'youtube_id': configItem.current_youtube_id.youtube_id,
         }
         return JsonResponse(data)
     else:

@@ -69,12 +69,19 @@
             data: {},
             dataType: 'json',
             success: function (data) {
-              console.log(data);
-
-              //Update Interface
+                //Update Interface
               $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
               $('#shuffle').prop("checked", data.shuffle);
               $('#repeat').prop("checked", data.repeat);
+
+              var old_id = player.getVideoData()['video_id'];
+              console.log("old_id: " + old_id + ", data.current_youtube_id: " + data.youtube_id);
+              if (old_id != data.youtube_id)
+              {
+                console.log("loading new vid");
+                player.loadVideoById(data.youtube_id);
+              }
+
 
               //Update Playlist
               var node = document.getElementById("playlist");
@@ -107,7 +114,6 @@
               },
               dataType: 'json',
               success: function (data) {
-                  console.log(data);
                 if (!data.success)
                 {
                   alert("Failure!");
@@ -147,7 +153,7 @@
         player = new YT.Player('player', {
           height: '360',
           width: '640',
-          videoId: 'M7lc1UVf-VE',
+          videoId: 'UBX8MWYel3s',
           playerVars: {'controls': 0 },
           events: {
             'onReady': onPlayerReady,
