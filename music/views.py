@@ -9,7 +9,7 @@ from django.http import JsonResponse
 import logging
 from django.db.utils import IntegrityError
 import sqlite3
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
