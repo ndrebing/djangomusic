@@ -94,6 +94,7 @@ def login_action(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")
     user = authenticate(request, username=username, password=password)
+    logger.error(user, password)
     if user is not None:
         login(request, user)
         return HttpResponseRedirect("/play_music")
@@ -118,6 +119,7 @@ def play_music(request):
         template = loader.get_template('music/play_music.html')
         context = {
             'playlist_items': playlist_items,
+            'username': request.user.username,
         }
         return HttpResponse(template.render(context, request))
     else:
