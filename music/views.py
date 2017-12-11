@@ -93,7 +93,7 @@ def login_action(request):
         login(request, user)
         return HttpResponseRedirect("/play_music")
     else:
-        return HttpResponse("Nope, try again maybe :(")
+        return HttpResponse("Login failed :(")
 
 
 def index(request):
