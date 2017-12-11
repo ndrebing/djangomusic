@@ -119,7 +119,7 @@ def play_music(request):
     else:
         return HttpResponseRedirect(".")
 
-def logout_view(request):
+def logout_action(request):
     logout(request)
     return HttpResponseRedirect(".")
 
