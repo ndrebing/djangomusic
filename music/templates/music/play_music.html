@@ -71,30 +71,27 @@
               data: {},
               dataType: 'json',
               success: function (data) {
-                  if (data.is_added) {
-                      alert("You voted!");
-                  }
-                  else {
+                  if (!data.is_added) {
                       alert("Du hast schon gevotet!")
                   }
               }
           });
       }
 
-      var interval = 1000;  // 1000 = 1 second, 3000 = 3 seconds
+      var interval = 750;  // 1000 = 1 second, 3000 = 3 seconds
       function updateInterface() {
         $.ajax({
             url: '{% url "get_interface" %}',
             data: {},
             dataType: 'json',
             success: function (data) {
-              console.log(data);
+
 
                 //Update Interface
               $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
-              //if (data.interface_log != "") {
-              //  $('#interface_log').append($(data.interface_log).text());
-              //}
+              if (data.interface_log != "") {
+                $('#interface_log').val(data.interface_log);
+              }
 
               $('#shuffle').prop("checked", data.shuffle);
               $('#repeat').prop("checked", data.repeat);
@@ -192,7 +189,7 @@
 
       function onPlayerReady(event) {
         event.target.playVideo();
-        setTimeout(updateInterface, 100);
+        setTimeout(updateInterface, 1000);
       }
 
       function onPlayerStateChange(event) {

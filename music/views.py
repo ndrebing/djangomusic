@@ -12,10 +12,17 @@ import sqlite3
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 import random
+import datetime
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 youtube_api_key = "CO5ZIUFYwMY&key=AIzaSyBZOk4mXjHUwPQeuw8JiEic0HqD-Ji-A0k" ### private, please dont share
+
+interface_log = [""]
+
+def add_interface_log(request, text):
+    date_str = datetime.datetime.now().strftime("%H:%M:%S")
+    interface_log.append(request.user.username + "(" + date_str + "): " + text)
 
 def youtube_url_validation(url):
     youtube_regex = (
@@ -50,6 +57,10 @@ def create_database_integrity():
 
 def change_config(request):
     if request.method == 'GET':
+        # Read Database (in casecreate_database_integrity() restored default )
+        shuffle_db = ConfigItem.objects.latest('id').shuffle
+        repeat_db = ConfigItem.objects.latest('id').repeat
+
         shuffle = True if request.GET.get('shuffle', False) == "true" else False
         repeat = True if request.GET.get('repeat', False) == "true" else False
 
@@ -62,9 +73,8 @@ def change_config(request):
         except:
             create_database_integrity()
 
-        # Read Database (in casecreate_database_integrity() restored default )
-        shuffle_db = ConfigItem.objects.latest('id').shuffle
-        repeat_db = ConfigItem.objects.latest('id').repeat
+        if (shuffle != shuffle_db):
+            add_interface_log(request, "Changed Shuffle")
 
         data = {
             'shuffle_val': shuffle_db,
@@ -75,6 +85,10 @@ def change_config(request):
 def get_interface(request):
     if request.user.is_authenticated:
         playlist = [entry.youtube_id for entry in PlaylistItem.objects.all()]
+        interface_log_text = ""
+        for entry in interface_log[-20:]:
+            interface_log_text += entry +"\n"
+
         try:
             configItem  = ConfigItem.objects.all()[0]
         except:
@@ -87,6 +101,7 @@ def get_interface(request):
             'repeat': configItem.repeat,
             'is_playing': configItem.is_playing,
             'youtube_id': configItem.current_youtube_id.youtube_id,
+            'interface_log': interface_log_text,
         }
         return JsonResponse(data)
     else:
@@ -116,6 +131,7 @@ def notify_server(request):
             pickNextSong()
 
         elif value == '1':
+            add_interface_log(request, "Started playback")
             try:
                 configItem = ConfigItem.objects.latest('id')
                 configItem.is_playing = True
@@ -124,12 +140,14 @@ def notify_server(request):
                 create_database_integrity()
 
         elif value == '2':
+            add_interface_log(request, "Paused playback")
             try:
                 configItem = ConfigItem.objects.latest('id')
                 configItem.is_playing = False
                 configItem.save()
             except:
                 create_database_integrity()
+        return HttpResponse("notification: working as intended")
 
 
 def add_youtube_url(request):
@@ -170,6 +188,8 @@ def add_youtube_url(request):
                 'youtube_id': youtube_id
             }
             return JsonResponse(data)
+
+        add_interface_log(request, "Added " + link)
 
         # build data that is returned to javascript
         data = {
@@ -212,6 +232,7 @@ def vote_skip_action(request):
         'is_added': False
     }
     if request.user.is_authenticated:
+
         configItem = ConfigItem.objects.latest('id')
         voted_ids = configItem.vote_skip_list
 
@@ -235,7 +256,7 @@ def vote_skip_action(request):
 
         configItem.vote_skip_list = voted_ids
         configItem.save()
-
+        add_interface_log(request, "Voted to skip")
         print("COUNT FOR VOTE NOW: " + str(cnt))
 
         if cnt >= 2:
@@ -244,7 +265,7 @@ def vote_skip_action(request):
 
     else:
         return JsonResponse(data)
-    
+
 
 def signup_action(request):
     username = request.POST.get('username', "")
@@ -261,13 +282,18 @@ def signup_action(request):
         return HttpResponse("Username schon vergeben :(")
     try:
         login(request, new_user)
+        add_interface_log(request, "Signed up")
         return HttpResponseRedirect("/play_music")
     except:
         return HttpResponse("login failed")
 
 def logout_action(request):
-    logout(request)
-    return HttpResponseRedirect(".")
+    if request.user.is_authenticated:
+        logout(request)
+        add_interface_log(request, "Logged out")
+        return HttpResponseRedirect(".")
+    else:
+        return HttpResponseRedirect("Haxx")
 
 def login_action(request):
     username = request.POST.get('username', "")
@@ -276,6 +302,7 @@ def login_action(request):
     logger.error(user, password)
     if user is not None:
         login(request, user)
+        add_interface_log(request, "Logged in")
         return HttpResponseRedirect("/play_music")
     else:
         return HttpResponse("Login failed :(")
