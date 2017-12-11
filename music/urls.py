@@ -13,5 +13,4 @@ urlpatterns = [
     path('ajax/change_config/', views.change_config, name='change_config'),
     path('ajax/get_interface/', views.get_interface, name='get_interface'),
     path('ajax/notify_server/', views.notify_server, name='notify_server'),
-    path('ajax/get_playlist/', views.get_playlist, name='get_playlist'),
 ]
