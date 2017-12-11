@@ -113,30 +113,7 @@ def notify_server(request):
             configItem.save()
 
         elif value == '0':
-            # do what you want cause a pirate is freeeee
-            #TODO: handling of cases, doing something useful with it
-            configItem = ConfigItem.objects.latest('id')
-            shuffle = configItem.shuffle
-            repeat = configItem.repeat
-            current_playlistItem = configItem.current_youtube_id
-            if not shuffle:
-                if PlaylistItem.objects.latest("id").id > current_playlistItem.id:
-                    valid_ids = [x['id'] for x in PlaylistItem.objects.order_by('date_added').values('id')]
-                    new_id = valid_ids[valid_ids.index(current_playlistItem.id) + 1]
-                else:
-                    new_id = PlaylistItem.objects.order_by('date_added')[0].id
-            else:
-                while True:
-                    valid_ids = [x['id'] for x in PlaylistItem.objects.values('id')]
-                    new_id = random.sample(valid_ids,1)[0]
-                    print(new_id, current_playlistItem.id)
-                    if new_id != current_playlistItem.id:
-                        break
-            try:
-                configItem.current_youtube_id = PlaylistItem.objects.get(id=new_id)
-                configItem.save()
-            except:
-                create_database_integrity()
+            pickNextSong()
 
         elif value == '1':
             try:
@@ -230,6 +207,39 @@ def play_music(request):
     else:
         return HttpResponseRedirect(".")
 
+def vote_skip_action(request):
+    data = {
+        'is_added': False
+    }
+    if request.user.is_authenticated:
+        configItem = ConfigItem.objects.latest('id')
+        voted_ids = configItem.vote_skip_list
+
+        split_ids = voted_ids.split(';')
+        if not voted_ids:
+            voted_ids += (str(request.user.id) + ';')
+            data = {
+                'is_added': True
+            }
+        else:
+            if any(str(request.user.id) in s for s in split_ids):
+                return JsonResponse(data)
+            else:
+                voted_ids += (str(request.user.id) + ';')
+                data = {
+                    'is_added': True
+                }
+        ##TOOD: calc voteskiprate
+
+
+        configItem.vote_skip_list = voted_ids
+        configItem.save()
+        return JsonResponse(data)
+
+    else:
+        return JsonResponse(data)
+    
+
 def signup_action(request):
     username = request.POST.get('username', "")
     password = request.POST.get('password', "")
@@ -269,3 +279,31 @@ def detail(request, playlistitem_id):
         return HttpResponse("Title %s." % PlaylistItem.objects.get(id=playlistitem_id).youtube_id)
     else:
         return HttpResponseRedirect(".")
+
+
+def pickNextSong():
+    # do what you want cause a pirate is freeeee
+    #TODO: handling of cases, doing something useful with it
+    configItem = ConfigItem.objects.latest('id')
+    shuffle = configItem.shuffle
+    repeat = configItem.repeat
+    current_playlistItem = configItem.current_youtube_id
+    if not shuffle:
+        if PlaylistItem.objects.latest("id").id > current_playlistItem.id:
+            valid_ids = [x['id'] for x in PlaylistItem.objects.order_by('date_added').values('id')]
+            new_id = valid_ids[valid_ids.index(current_playlistItem.id) + 1]
+        else:
+            new_id = PlaylistItem.objects.order_by('date_added')[0].id
+    else:
+        while True:
+            valid_ids = [x['id'] for x in PlaylistItem.objects.values('id')]
+            new_id = random.sample(valid_ids,1)[0]
+            print(new_id, current_playlistItem.id)
+            if new_id != current_playlistItem.id:
+                break
+    try:
+        configItem.current_youtube_id = PlaylistItem.objects.get(id=new_id)
+        configItem.vote_skip_list = ""
+        configItem.save()
+    except:
+        create_database_integrity()

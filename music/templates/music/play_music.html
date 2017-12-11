@@ -59,7 +59,19 @@
       });
 
       function voteSkip() {
-        alert("Todo")
+          $.ajax({
+              url: '{% url "vote_skip" %}',
+              data: {},
+              dataType: 'json',
+              success: function (data) {
+                  if (data.is_added) {
+                      alert("You voted!");
+                  }
+                  else {
+                      alert("Du hast schon gevotet!")
+                  }
+              }
+          });
       }
 
       var interval = 1000;  // 1000 = 1 second, 3000 = 3 seconds

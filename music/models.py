@@ -22,6 +22,7 @@ class ConfigItem(models.Model):
     shuffle = models.BooleanField(default=False)
     repeat = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
+    vote_skip_list = models.TextField(default='')
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
