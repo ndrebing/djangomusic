@@ -13,7 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
-youtube_api_key = "CO5ZIUFYwMY&key=AIzaSyBZOk4mXjHUwPQeuw8JiEic0HqD-Ji-A0k" # private, please dont share
+youtube_api_key = "CO5ZIUFYwMY&key=AIzaSyBZOk4mXjHUwPQeuw8JiEic0HqD-Ji-A0k" ### private, please dont share
 
 def youtube_url_validation(url):
     youtube_regex = (
