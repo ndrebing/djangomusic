@@ -40,7 +40,7 @@ def add_youtube_url(request):
         logger.error('link: ' + link)
         # Parse given link
         try:
-            youtube_id = re.search('v=(\w[A-Za-z1-9_\-]\w+)', link).group(0)[2:]
+            youtube_id = re.search('v=(\w[A-Za-z1-9_-]\w+)', link).group(0)[2:]
         except:
             logger.error('Parsing of link failed3')
             data = {
