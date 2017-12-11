@@ -85,6 +85,7 @@ def get_interface(request):
             'playlist_length': len(playlist),
             'shuffle': configItem.shuffle,
             'repeat': configItem.repeat,
+            'is_playing': configItem.is_playing,
             'youtube_id': configItem.current_youtube_id.youtube_id,
         }
         return JsonResponse(data)
@@ -137,9 +138,21 @@ def notify_server(request):
             except:
                 create_database_integrity()
 
+        elif value == '1':
+            try:
+                configItem = ConfigItem.objects.latest('id')
+                configItem.is_playing = True
+                configItem.save()
+            except:
+                create_database_integrity()
 
-
-
+        elif value == '2':
+            try:
+                configItem = ConfigItem.objects.latest('id')
+                configItem.is_playing = False
+                configItem.save()
+            except:
+                create_database_integrity()
 
 
 def add_youtube_url(request):

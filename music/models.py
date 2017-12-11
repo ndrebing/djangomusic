@@ -21,6 +21,7 @@ class ConfigItem(models.Model):
     current_youtube_id = models.ForeignKey("PlaylistItem", on_delete=models.PROTECT)
     shuffle = models.BooleanField(default=False)
     repeat = models.BooleanField(default=False)
+    is_playing = models.BooleanField(default=False)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

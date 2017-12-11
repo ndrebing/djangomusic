@@ -62,13 +62,15 @@
         alert("Todo")
       }
 
-      var interval = 500;  // 1000 = 1 second, 3000 = 3 seconds
+      var interval = 1000;  // 1000 = 1 second, 3000 = 3 seconds
       function updateInterface() {
         $.ajax({
             url: '{% url "get_interface" %}',
             data: {},
             dataType: 'json',
             success: function (data) {
+              console.log(data);
+
                 //Update Interface
               $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
               $('#shuffle').prop("checked", data.shuffle);
@@ -78,6 +80,12 @@
               if (old_id != data.youtube_id)
               {
                 player.loadVideoById(data.youtube_id);
+              }
+
+              if (data.is_playing) { //player.getPlayerState() == 2 &
+                player.playVideo();
+              } else if (!data.is_playing) {//player.getPlayerState() == 1 &
+                player.pauseVideo();
               }
 
               //Update Playlist
@@ -165,18 +173,16 @@
       }
 
       function onPlayerStateChange(event) {
-          if (event.data == YT.PlayerState.ENDED) {
-              $.ajax({
-                  url: '{% url "notify_server" %}',
-                  data: {
-                      'status': YT.PlayerState.ENDED
-                  },
-                  dataType: 'json',
-                  success: function (data) {
-                      console.log(data);
-                  }
-              });
-          }
+          $.ajax({
+              url: '{% url "notify_server" %}',
+              data: {
+                  'status': event.data
+              },
+              dataType: 'json',
+              success: function (data) {
+                  console.log(data);
+              }
+          });
       }
 
       function stopVideo() {
