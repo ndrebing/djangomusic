@@ -42,7 +42,7 @@ def add_youtube_url(request):
         logger.error('link: ' + link)
         # Parse given link
         try:
-            youtube_id = util.youtube_url_validation(link)
+            youtube_id = youtube_url_validation(link)
         except:
             logger.error('Parsing of link failed')
             data = {
