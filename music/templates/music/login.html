@@ -6,17 +6,43 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{% block title %}Default Title{% endblock %}</title>
+    <title>{% block title %}Login{% endblock %}</title>
     {% block stylesheet %}{% endblock %}
   </head>
   <body>
     <header></header>
-      <div>
-          <form action="/login" method="post">
-              {% csrf_token %}
-              {{ LoginForm }}
-              <input type="submit" value="OK">
-          </form>
-      </div>
+    <div class=center>
+        <!-- login form -->
+          <div class=formbox>
+              <div class=margin>
+                  <div style="padding-bottom: 20px"> <b> Login </b> </div>
+                  <form action="/login" method="post">
+                      {% csrf_token %}
+                      <label>Username: {{ LoginForm.username }}</label>
+                      <br />
+                      <label>Password: {{ LoginForm.password }}</label>
+                      <br />
+                      <input type="submit" value="OK">
+                  </form>
+              </div>
+          </div>
+        <!-- end login form -->
+      <br>
+      <!-- signup form -->
+          <div class=formbox>
+              <div class=margin>
+                  <div style="padding-bottom: 20px"> <b> Sign Up </b> </div>
+                  <form action="/signup" method="post">
+                      {% csrf_token %}
+                      <label>Username: {{ SignupForm.username }}</label>
+                      <br />
+                      <label>Password: {{ SignupForm.password }}</label>
+                      <br />
+                      <input type="submit" value="OK">
+                  </form>
+              </div>
+          </div>
+      <!-- end signup form -->
+    </div>
   </body>
 </html>
