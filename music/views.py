@@ -236,6 +236,8 @@ def vote_skip_action(request):
         configItem.vote_skip_list = voted_ids
         configItem.save()
 
+        logger.error("COUNT FOR VOTE NOW: " + cnt)
+
         if cnt >= 2:
             pickNextSong()
         return JsonResponse(data)
