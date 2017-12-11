@@ -216,8 +216,10 @@ def vote_skip_action(request):
         voted_ids = configItem.vote_skip_list
 
         split_ids = voted_ids.split(';')
+        cnt = len(split_ids)-1
         if not voted_ids:
             voted_ids += (str(request.user.id) + ';')
+            cnt += 1
             data = {
                 'is_added': True
             }
@@ -226,15 +228,15 @@ def vote_skip_action(request):
                 return JsonResponse(data)
             else:
                 voted_ids += (str(request.user.id) + ';')
+                cnt +=1
                 data = {
                     'is_added': True
                 }
-        ##TOOD: calc voteskiprate
 
         configItem.vote_skip_list = voted_ids
         configItem.save()
 
-        if(len(voted_ids.split(';')) - 1) >= 2:
+        if cnt >= 2:
             pickNextSong()
         return JsonResponse(data)
 
