@@ -81,8 +81,7 @@
                 console.log("loading new vid");
                 player.loadVideoById(data.youtube_id);
               }
-
-
+              
               //Update Playlist
               var node = document.getElementById("playlist");
               while (node.firstChild) {
@@ -103,7 +102,7 @@
             }
         });
       }
-      setTimeout(updateInterface, interval);
+
 
       function submitYoutubeLink() {
           var link = $("#id_link").val();
@@ -164,6 +163,7 @@
 
       function onPlayerReady(event) {
         event.target.playVideo();
+        setTimeout(updateInterface, 100);
       }
 
       function onPlayerStateChange(event) {
