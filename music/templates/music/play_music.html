@@ -34,15 +34,12 @@
         <tr>
             <td>
                 <div>
-                    <b>Config:</b>
                     <label>Shuffle: <input name="Shuffle" type="checkbox" , id="shuffle" onchange="pushConfig()"> </label>
                     <label>Repeat: <input name="Repeat" type="checkbox" , id="repeat" onchange="pushConfig()"> </label>
+                    <label>URL: <input name="URL" type="text" , id="id_link"></label>
+                    <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();" />
                     <input type="button" value="Vote skip" onclick="voteSkip();"/>
                 </div>
-            </td>
-            <td>
-                <label>URL: <input name="URL" type="text" , id="id_link"></label>
-                <input type="button" value="Submit youtube link" onclick="submitYoutubeLink();" />
             </td>
           </tr>
       </table>
@@ -83,7 +80,10 @@
 
                 //Update Interface
               $('#PlaylistHeader').text('Playlist ('+ data.playlist_length +')');
-              $('#interface_log').text('Playlist ('+ data.playlist_length +')');
+              //if (data.interface_log != "") {
+              //  $('#interface_log').append($(data.interface_log).text());
+              //}
+
               $('#shuffle').prop("checked", data.shuffle);
               $('#repeat').prop("checked", data.repeat);
 
