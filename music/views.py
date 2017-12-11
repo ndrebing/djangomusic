@@ -9,7 +9,6 @@ from django.http import JsonResponse
 import logging
 from django.db.utils import IntegrityError
 import sqlite3
-from urllib.parse import urlparse
 from django.contrib.auth import authenticate, login
 
 # Get an instance of a logger
@@ -43,7 +42,7 @@ def add_youtube_url(request):
         try:
             youtube_id = re.search('v=(\w[A-Za-z1-9_]\w+)', link).group(0)[2:]
         except:
-            logger.error('Parsing of link failed')
+            logger.error('Parsing of link failed3')
             data = {
                 'is_added': False,
                 'success': False,
