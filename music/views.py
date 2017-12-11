@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
 from .models import PlaylistItem, ConfigItem
 from django.template import loader
-from .forms import SignUpForm
+from .forms import LoginForm
 from django.utils import timezone
 import re
 from django.http import JsonResponse
@@ -10,7 +10,7 @@ import logging
 from django.db.utils import IntegrityError
 import sqlite3
 from django.contrib.auth import authenticate, login, logout
-import .util
+from .util import *
 
 
 # Get an instance of a logger
@@ -101,10 +101,10 @@ def index(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect("/play_music")
     else:
-        form = SignUpForm()
-        template = loader.get_template('music/signup.html')
+        form = LoginForm()
+        template = loader.get_template('music/login.html')
         context = {
-            'SignUpForm': form,
+            'LoginForm': form,
         }
         return HttpResponse(template.render(context, request))
 
