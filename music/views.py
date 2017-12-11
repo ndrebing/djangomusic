@@ -231,9 +231,11 @@ def vote_skip_action(request):
                 }
         ##TOOD: calc voteskiprate
 
-
         configItem.vote_skip_list = voted_ids
         configItem.save()
+
+        if(len(voted_ids.split(';')) - 1) > 3:
+            pickNextSong()
         return JsonResponse(data)
 
     else:
