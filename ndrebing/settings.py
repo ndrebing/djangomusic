@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['music.ndrebing.de', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'music.apps.MusicConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -143,4 +144,14 @@ LOGGING = {
             'propagate': True,
         },
     },
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'asgi_redis.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('localhost', 8001)],
+        },
+        'ROUTING': 'music.routing.channel_routing',
+    }
 }

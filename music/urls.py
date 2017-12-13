@@ -3,15 +3,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('login', views.login_action, name='login'),
-    path('logout', views.logout_action, name='logout'),
-    path('signup', views.signup_action, name='signup'),
-    path('play_music', views.play_music, name='play_music'),
-    path('<int:playlistitem_id>/', views.detail, name='detail'),
-    path('ajax/add_youtube_url/', views.add_youtube_url, name='add_youtube_url'),
-    path('ajax/change_config/', views.change_config, name='change_config'),
-    path('ajax/get_interface/', views.get_interface, name='get_interface'),
-    path('ajax/notify_server/', views.notify_server, name='notify_server'),
-    path('ajax/vote_skip_action/', views.vote_skip_action, name='vote_skip'),
+    path('', views.log_in, name='index'),
+    path('user_list', views.user_list, name='user_list'),
+    path('log_in', views.log_in, name='log_in'),
+    path('log_out', views.log_out, name='log_out'),
+    path('sign_up', views.sign_up, name='sign_up'),
 ]
