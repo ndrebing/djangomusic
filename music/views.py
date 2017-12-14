@@ -96,8 +96,7 @@ def user_list(request):
 @login_required(login_url='log_in')
 def room(request, url):
     room, created = Room.objects.get_or_create(url=url)
-    playlistItems = PlaylistItem.objects.filter(room=room).order_by('-added')
-
+    playlistItems = list(PlaylistItem.objects.filter(room=room).order_by('-added'))
     profile = Profile.objects.get(user=request.user)
     profile.last_room = room
     profile.save()
@@ -107,6 +106,7 @@ def room(request, url):
         'playlistItems': playlistItems,
         'user': request.user,
         'profile': profile,
+        'room': room,
     })
 
 #def create_database_integrity():
