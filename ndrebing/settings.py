@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['music.ndrebing.de', 'localhost']
 INSTALLED_APPS = [
     'channels',
     'music.apps.MusicConfig',
+    'bootstrap4',
+    'bootstrap_themes',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

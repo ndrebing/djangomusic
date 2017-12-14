@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
-from .models import PlaylistItem, ConfigItem, Room
+from .models import PlaylistItem, Room, Profile
 from django.template import loader
-from .forms import LoginForm
 from django.utils import timezone
 import re
 from django.http import JsonResponse
@@ -16,6 +15,8 @@ import random
 import datetime
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import render, redirect
+from .models import genId
+from music.forms import SignUpForm, LogInForm
 
 ###################################################################################################################################
 logger = logging.getLogger(__name__)
@@ -23,27 +24,21 @@ youtube_api_key = "CO5ZIUFYwMY&key=AIzaSyBZOk4mXjHUwPQeuw8JiEic0HqD-Ji-A0k" ### 
 User = get_user_model()
 ###################################################################################################################################
 
-@login_required(login_url='log_in')
-def user_list(request):
-    """
-    NOTE: This is fine for demonstration purposes, but this should be
-    refactored before we deploy this app to production.
-    Imagine how 100,000 users logging in and out of our app would affect
-    the performance of this code!
-    """
-    users = User.objects.select_related('logged_in_user')
-    for user in users:
-        user.status = 'Online' if hasattr(user, 'logged_in_user') else 'Offline'
-    return render(request, 'music/user_list.html', {'users': users, 'username': request.user.username})
-
-
 def log_in(request):
-    form = AuthenticationForm()
+    form = LogInForm()
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
+        form = LogInForm(data=request.POST)
         if form.is_valid():
-            login(request, form.get_user())
-            return HttpResponseRedirect("user_list")
+            data = form.cleaned_data
+            user = authenticate(request, username=data['username'], password=data['password'])
+            login(request, user)
+
+            # Send user to last_room or generate a new one if new user
+            profile = Profile.objects.get(user=user)
+            if profile.last_room is not None:
+                return HttpResponseRedirect(profile.last_room.url)
+            else:
+                return HttpResponseRedirect(str(genId()))
 
         else:
             print(form.errors)
@@ -55,16 +50,30 @@ def log_out(request):
     return HttpResponseRedirect("log_in")
 
 def sign_up(request):
-    form = UserCreationForm()
+    form = SignUpForm()
     if request.method == 'POST':
-        form = UserCreationForm(data=request.POST)
+        form = SignUpForm(data=request.POST)
         if form.is_valid():
-            form.save()
+            data = form.cleaned_data
+            if User.objects.filter(username=data['username']).exists():
+                return HttpResponse("Username exists")
+
+            if data['password'] != data['password2']:
+                return HttpResponse("Passwords are not the same")
+
+            # TODO only allow long passwords?
+
+            if User.objects.filter(email=data['email']).exists():
+                return HttpResponse("Your email is already in use")
+
+            user = User.objects.create_user(data['username'], data['email'] , data['password'])
             return HttpResponseRedirect("log_in")
         else:
-            print(form.errors)
+            return HttpResponse(str(form.errors))
+
     return render(request, 'music/sign_up.html', {'form': form})
 
+# TODO ask youtube.com for title and check if its acutally valid
 def youtube_url_validation(url):
     youtube_regex = (
         r'(https?://)?(www\.)?'
@@ -76,6 +85,29 @@ def youtube_url_validation(url):
         return youtube_regex_match.group(6)
 
     return youtube_regex_match
+
+@login_required(login_url='log_in')
+def user_list(request):
+    users = User.objects.select_related('logged_in_user')
+    for user in users:
+        user.status = 'Online' if hasattr(user, 'logged_in_user') else 'Offline'
+    return render(request, 'music/user_list.html', {'users': users, 'username': request.user.username})
+
+@login_required(login_url='log_in')
+def room(request, url):
+    room, created = Room.objects.get_or_create(url=url)
+    playlistItems = PlaylistItem.objects.filter(room=room).order_by('-added')
+
+    profile = Profile.objects.get(user=request.user)
+    profile.last_room = room
+    profile.save()
+
+    return render(request, "music/room.html", {
+        'url': url,
+        'playlistItems': playlistItems,
+        'user': request.user,
+        'profile': profile,
+    })
 
 #def create_database_integrity():
 #    logger.debug("create_database_integrity")

@@ -1,0 +1,87 @@
+{% extends 'music/_base.html' %}
+
+{% load bootstrap4 %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{{url}}">Room {{url}}</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'log_out' %}">Logout</a>
+      </li>
+
+    </ul>
+  </div>
+  <form class="form-inline">
+    <input class="form-control mr-sm-2" type="search" placeholder="Youtube link" aria-label="Search">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
+  </form>
+</nav>
+
+<div class="container">
+  <div class="row justify-content-md-center">
+    <div class="col">
+      <div id=player></div>
+    </div>
+    <div class="col col-lg-2">
+      <div class="content center">
+        <ul class="list-group" style="width:200%;">
+          {% for item in playlistItems %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">{{ item.title }}<span class="badge badge-primary badge-pill">{{item.user_added.username}}</span></li>
+          {% empty %}
+            <li class="list-group-item">Playlist is empty :(</li>
+          {% endfor %}
+        </ul>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock content %}
+
+{% block script %}
+<script>
+///////////////////////////////////
+// Youtube player stuff
+///////////////////////////////////
+  var tag = document.createElement('script');
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '640',
+      videoId: 'UBX8MWYel3s',
+      playerVars: {'controls': 1 },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange,
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+
+  function onPlayerStateChange(event) {  }
+
+  function stopVideo() {
+    player.stopVideo();
+  }
+</script>
+{% endblock script %}

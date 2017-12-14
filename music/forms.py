@@ -1,5 +1,11 @@
 from django import forms
 
-class LoginForm(forms.Form):
-    username = forms.CharField(label='username', max_length=100)
-    password = forms.CharField(label='password', max_length=100)
+class SignUpForm(forms.Form):
+    username = forms.CharField(label="Username", widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Username'}))
+    email = forms.CharField(label="Email (optional)", widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Email'}))
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'Password'}))
+    password2 = forms.CharField(label="Confirm password", widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':''}))
+
+class LogInForm(forms.Form):
+    username = forms.CharField(label="Username", widget=forms.TextInput(attrs={'class':'form-control','placeholder':'Enter username'}))
+    password = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={'class':'form-control','placeholder':'Enter password'}))

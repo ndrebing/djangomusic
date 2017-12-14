@@ -1,15 +1,20 @@
 {% extends 'music/_base.html' %}
 
+{% load bootstrap4 %}
+
+{% block title %}Login{% endblock %}
+
 {% block content %}
+<img src="https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-589843.jpg" class="img-fluid" alt="Responsive image">
+<div class="center form-group" style="width:20%;">
   <form action="{% url 'log_in' %}" method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <div>
-        {{ field.label_tag }}
-        {{ field }}
-      </div>
-    {% endfor %}
-    <button type="submit">Log in</button>
+    {%csrf_token%}
+    {% bootstrap_form form %}
+    {% buttons %}
+    <button type = "submit" class="btn btn-info" style="width:100%">Login</button>
+    {% endbuttons %}
   </form>
-  <p>Don't have an account? <a href="{% url 'sign_up' %}">Sign up!</a></p>
+  <p>Don't have an account? <a href="{% url 'sign_up' %}">Sign up! </a></p>
+</div>
+
 {% endblock content %}
