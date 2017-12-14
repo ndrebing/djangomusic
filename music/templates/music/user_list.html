@@ -16,7 +16,7 @@
 {% block script %}
   <script>
     // Websocket
-    var socket = new WebSocket('ws://' + window.location.host + '/users/');
+    var socket = new WebSocket('ws://' + window.location.host + '/ws/users/');
 
     // Loading IFrame Player API code asynchronously (no clue what is happening here)
     var tag = document.createElement('script');
