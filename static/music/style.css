@@ -24,16 +24,6 @@ td.op {
     transform: translate(-50%, -50%);
 }
 
-.rcenter {
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
 
-h1 {
-    font-family: 'Roboto';
-    font-color: #17201D;
-}
 
 html, body {margin: 0; height: 100%; overflow: hidden}

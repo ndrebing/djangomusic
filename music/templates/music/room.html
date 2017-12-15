@@ -15,88 +15,114 @@
       </li>
     </ul>
   </div>
-
 </nav>
-<div class="container center">
-  <div class="row" >
-  <div class="col-sm-8">
-    <div class="card" >
-      <div class="card-body">
 
-        <div id=player ></div>
-        <p></p>
+<div class="container center" style="height: 70%" >
 
+  <div class="row">
+    <div class="col">
+
+      <div class="container">
         <div class="row">
-          <div class="col col-sm-10">
-              Skip votes (1/3)<div class="progress"><div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" style="width: 25%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div></div>
+          <div class="col">
+            <div id="player"></div>
           </div>
-          <div class="col col-sm-2">
-              <button type="button" class="btn btn-outline-success my-2 my-sm-0 btn-sm">Vote</button>
+        </div>
+        <div class="row">
+          <div class="col">
+
+            <button class="btn btn-outline-warning my-2 my-sm-0" id="voteskip">Vote Skip</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" id="shuffle">Shuffle Off</button>
+            <div class="form-inline">
+              <input class="form-control" id="youtube_link" placeholder="Youtube link" style="margin: 5%;">
+              <button class="btn btn-outline-success my-2 my-sm-0" id="submit_link">Submit</button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-
-  <div class="col-sm-4">
-    <div class="card">
-      <div class="card-body">
-        <h4 class="card-title">Playlist({{playlistItems|length}})</h4>
-        <ul class="list-group" id="playlist">
+    <div class="col">
+      <table class="table table-sm" id="playlist">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 70%;" >Title</th>
+            <th scope="col" style="width: 20%;">Added by</th>
+          </tr>
+        </thead>
+        <tbody>
           {% for item in playlistItems %}
-              <li class="list-group-item d-flex justify-content-between align-items-center {% if item.youtube_id == room.current_playlistItem.youtube_id %}active{% endif %}">{{ item.title }}<span class="badge badge-primary badge-pill">{{item.user_added.username}}</span></li>
-          {% empty %}
-                <li class="list-group-item">Playlist is empty :(</li>
+              <tr>
+                <td><a href="https://www.youtube.com/watch?v={{item.youtube_id}}">{{ item.title }}</a></td>
+                <td>{{item.user_added.username}}</td>
+              </tr>
           {% endfor %}
-        </ul>
-      </p>
-      <div class="form-inline">
-        <input class="form-control" id="youtube_link" placeholder="Youtube link" style="margin: 5%;">
-        <button class="btn btn-outline-success my-2 my-sm-0" id="submit_link">Submit</button>
-      </div>
-      </div>
+        </tbody>
+      </table>
+
     </div>
 
+
   </div>
-</div>
+
 </div>
 
 {% endblock content %}
 
 {% block script %}
 <script>
+
+  $(document).ready(function() {
+    $('#playlist').DataTable( {
+        "searching":   false,
+        "lengthChange": false,
+        "info": false,
+        "oLanguage": { "sEmptyTable": "Playlist is empty :(" }
+    } );
+  } );
+
   function youtube_parser(url){
     var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
     var match = url.match(regExp);
     return (match&&match[7].length==11)? match[7] : url;
   }
 
-  var playlist_socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/playlist");
+  var socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/playlist");
   $('#submit_link').on('click', function(event) {
     var message = {
         message_type: 'submit_url',
         message_content: youtube_parser($('#youtube_link').val()),
         message_origin: '{{ url }}',
     }
-    playlist_socket.send(JSON.stringify(message));
+    socket.send(JSON.stringify(message));
   });
 
-  playlist_socket.onmessage = function(message) {
+  socket.onmessage = function(message) {
     var data = JSON.parse(message.data);
     switch(data.message_type) {
       case "alert":
-        alert(data.message_content)
+        alert(data.message_content);
         break;
       case "append_to_playlist":
-        $("#playlist").append("<li class='list-group-item d-flex justify-content-between align-items-center '>"+data.message_content[0]+"<span class='badge badge-primary badge-pill'>"+data.message_content[2]+"</span></li>");
-
-    }
+        $("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
+        //$("#playlist").append("<li class='list-group-item d-flex justify-content-between align-items-center '>"+data.message_content[0]+"<span class='badge badge-primary badge-pill'>"+data.message_content[2]+"</span></li>");
+        break;
+      case "play":
+        player.playVideo();
+        break;
+      case "pause":
+        player.pauseVideo();
+        break;
+      case "seek":
+        // implement?
+        player.pauseVideo();
+        break;
+      case "load":
+        player.loadVideoById(data.message_content);
+        break;
+    };
 };
 
-///////////////////////////////////
-// Youtube player stuff
-///////////////////////////////////
   var tag = document.createElement('script');
 
   tag.src = "https://www.youtube.com/iframe_api";
@@ -121,10 +147,13 @@
     event.target.playVideo();
   }
 
-  function onPlayerStateChange(event) {  }
-
-  function stopVideo() {
-    player.stopVideo();
+  function onPlayerStateChange(event) {
+    var message = {
+        message_type: 'player_state_change',
+        message_content: event.data,
+        message_origin: '{{ url }}',
+    };
+    socket.send(JSON.stringify(message));
   }
 </script>
 {% endblock script %}

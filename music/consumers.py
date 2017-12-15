@@ -74,7 +74,7 @@ def ws_receive(message):
                 # TODO alert users in room to add new playlist item
                 send_message(room_url, {
                     'message_type': 'append_to_playlist',
-                    'message_content': [item.title, item.thumbnail_link, submitting_user.username],
+                    'message_content': [item.title, item.thumbnail_link, submitting_user.username, item.youtube_id],
                     'message_origin': "server",
                 })
         else:
@@ -83,3 +83,18 @@ def ws_receive(message):
                 'message_content': "Invalid link " + str(possible_yt_id),
                 'message_origin': "server",
             })
+    elif data['message_type'] == "player_state_change":
+        player_state = data['message_content']
+        target = "pause"
+
+        if player_state == 1:
+            target = "play"
+        elif player_state == 2:
+            target = "pause"
+        elif player_state == 3:
+            target = "pause"
+        send_message(room_url, {
+            'message_type': target,
+            'message_content': "",
+            'message_origin': "server",
+        })
