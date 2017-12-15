@@ -31,14 +31,16 @@ def log_in(request):
         if form.is_valid():
             data = form.cleaned_data
             user = authenticate(request, username=data['username'], password=data['password'])
-            login(request, user)
+            if user is not None:
+                login(request, user)
 
-            # Send user to last_room or generate a new one if new user
-            profile = Profile.objects.get(user=user)
-            if profile.last_room is not None:
-                return HttpResponseRedirect(profile.last_room.url)
-            else:
-                return HttpResponseRedirect(str(genId()))
+                # Send user to last_room or generate a new one if new user
+                profile = Profile.objects.get(user=user)
+                if profile.last_room is not None:
+                    return HttpResponseRedirect(profile.last_room.url)
+                else:
+                    return HttpResponseRedirect(str(genId()))
+            return HttpResponse("Invalid username or password")
 
         else:
             print(form.errors)
@@ -73,19 +75,6 @@ def sign_up(request):
 
     return render(request, 'music/sign_up.html', {'form': form})
 
-# TODO ask youtube.com for title and check if its acutally valid
-def youtube_url_validation(url):
-    youtube_regex = (
-        r'(https?://)?(www\.)?'
-        '(youtube|youtu|youtube-nocookie)\.(com|be)/'
-        '(watch\?v=|embed/|v/|.+\?v=)?([^&=%\?]{11})')
-
-    youtube_regex_match = re.match(youtube_regex, url)
-    if youtube_regex_match:
-        return youtube_regex_match.group(6)
-
-    return youtube_regex_match
-
 @login_required(login_url='log_in')
 def user_list(request):
     users = User.objects.select_related('logged_in_user')
@@ -96,7 +85,7 @@ def user_list(request):
 @login_required(login_url='log_in')
 def room(request, url):
     room, created = Room.objects.get_or_create(url=url)
-    playlistItems = list(PlaylistItem.objects.filter(room=room).order_by('-added'))
+    playlistItems = list(PlaylistItem.objects.filter(room=room).order_by('added'))
     profile = Profile.objects.get(user=request.user)
     profile.last_room = room
     profile.save()

@@ -34,8 +34,8 @@ class PlaylistItem(models.Model):
     youtube_id = models.CharField(max_length=20)
     title = models.CharField(max_length=200, default="No title")
     thumbnail_link = models.CharField(max_length=200, default="")
-    last_played = models.DateTimeField(auto_now_add=True, blank=True)
-    added = models.DateTimeField(auto_now_add=True, blank=True)
+    last_played = models.DateTimeField(blank=True, null=True)
+    added = models.DateTimeField(auto_now_add=True)
     user_added = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey("Room", related_name="playlist_item_room", on_delete=models.CASCADE)
 

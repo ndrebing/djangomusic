@@ -11,19 +11,19 @@
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item ">
-        <a class="nav-link" href="{% url 'log_out' %}">Logout</a>
+        <a class="nav-link" href="{% url 'log_out' %}">Logout {{user.username}}</a>
       </li>
     </ul>
   </div>
 
 </nav>
 <div class="container center">
-  <div class="row">
+  <div class="row" >
   <div class="col-sm-8">
-    <div class="card">
+    <div class="card" >
       <div class="card-body">
 
-        <div id=player></div>
+        <div id=player ></div>
         <p></p>
 
         <div class="row">
@@ -43,7 +43,7 @@
     <div class="card">
       <div class="card-body">
         <h4 class="card-title">Playlist({{playlistItems|length}})</h4>
-        <ul class="list-group">
+        <ul class="list-group" id="playlist">
           {% for item in playlistItems %}
               <li class="list-group-item d-flex justify-content-between align-items-center {% if item.youtube_id == room.current_playlistItem.youtube_id %}active{% endif %}">{{ item.title }}<span class="badge badge-primary badge-pill">{{item.user_added.username}}</span></li>
           {% empty %}
@@ -51,15 +51,13 @@
           {% endfor %}
         </ul>
       </p>
-        <form class="form-inline">
-          <div class="form-group mx-sm-2">
-            <label for="inputPassword2" class="sr-only">Password</label>
-            <input type="password" class="form-control" id="inputPassword2" placeholder="Youtube link">
-          </div>
-          <button type="submit" class="btn btn-outline-success my-2 my-sm-0">Submit</button>
-        </form>
+      <div class="form-inline">
+        <input class="form-control" id="youtube_link" placeholder="Youtube link" style="margin: 5%;">
+        <button class="btn btn-outline-success my-2 my-sm-0" id="submit_link">Submit</button>
+      </div>
       </div>
     </div>
+
   </div>
 </div>
 </div>
@@ -68,6 +66,34 @@
 
 {% block script %}
 <script>
+  function youtube_parser(url){
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match&&match[7].length==11)? match[7] : url;
+  }
+
+  var playlist_socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/playlist");
+  $('#submit_link').on('click', function(event) {
+    var message = {
+        message_type: 'submit_url',
+        message_content: youtube_parser($('#youtube_link').val()),
+        message_origin: '{{ url }}',
+    }
+    playlist_socket.send(JSON.stringify(message));
+  });
+
+  playlist_socket.onmessage = function(message) {
+    var data = JSON.parse(message.data);
+    switch(data.message_type) {
+      case "alert":
+        alert(data.message_content)
+        break;
+      case "append_to_playlist":
+        $("#playlist").append("<li class='list-group-item d-flex justify-content-between align-items-center '>"+data.message_content[0]+"<span class='badge badge-primary badge-pill'>"+data.message_content[2]+"</span></li>");
+
+    }
+};
+
 ///////////////////////////////////
 // Youtube player stuff
 ///////////////////////////////////
