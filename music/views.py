@@ -85,11 +85,11 @@ def user_list(request):
 @login_required(login_url='log_in')
 def room(request, url):
     room, created = Room.objects.get_or_create(url=url)
-    playlistItems = list(PlaylistItem.objects.filter(room=room).order_by('added'))
+    playlistItems = PlaylistItem.objects.filter(room=room).order_by('added')
     profile = Profile.objects.get(user=request.user)
     profile.last_room = room
     profile.save()
-
+    
     return render(request, "music/room.html", {
         'url': url,
         'playlistItems': playlistItems,

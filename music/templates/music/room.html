@@ -4,7 +4,7 @@
 
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="{{url}}">{{url}}</a>
+  <a class="navbar-brand" data-toggle="tooltip" data-placement="bottom" data-html="true" title="" id="header_navbar" href="{{url}}">{{url}}</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -32,7 +32,8 @@
           <div class="col">
 
             <button class="btn btn-outline-warning my-2 my-sm-0" id="voteskip">Vote Skip</button>
-            <button class="btn btn-outline-success my-2 my-sm-0" id="shuffle">Shuffle Off</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" id="shuffle">Turn Shuffle {% if room.shuffle %}Off{% else %}On{% endif %}</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" id="repeat">Turn Repeat {% if room.shuffle %}Off{% else %}On{% endif %}</button>
             <div class="form-inline">
               <input class="form-control" id="youtube_link" placeholder="Youtube link" style="margin: 5%;">
               <button class="btn btn-outline-success my-2 my-sm-0" id="submit_link">Submit</button>
@@ -88,10 +89,30 @@
   }
 
   var socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/playlist");
+
   $('#submit_link').on('click', function(event) {
     var message = {
         message_type: 'submit_url',
         message_content: youtube_parser($('#youtube_link').val()),
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+    $('#youtube_link').val("");
+  });
+
+  $('#shuffle').on('click', function(event) {
+    var message = {
+        message_type: 'toggle_shuffle',
+        message_content: '',
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  });
+
+  $('#repeat').on('click', function(event) {
+    var message = {
+        message_type: 'toggle_repeat',
+        message_content: '',
         message_origin: '{{ url }}',
     }
     socket.send(JSON.stringify(message));
@@ -105,7 +126,7 @@
         break;
       case "append_to_playlist":
         $("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
-        //$("#playlist").append("<li class='list-group-item d-flex justify-content-between align-items-center '>"+data.message_content[0]+"<span class='badge badge-primary badge-pill'>"+data.message_content[2]+"</span></li>");
+        $('#playlist').DataTable().fnDraw();
         break;
       case "play":
         player.playVideo();
@@ -119,6 +140,27 @@
         break;
       case "load":
         player.loadVideoById(data.message_content);
+        break;
+      case "change_shuffle_button":
+        if (data.message_content) {
+          $('#shuffle').html("Turn Shuffle Off");
+        }
+        else {
+          $('#shuffle').html("Turn Shuffle On");
+        }
+        break;
+      case "change_repeat_button":
+        if (data.message_content) {
+          $('#repeat').html("Turn Repeat Off");
+        }
+        else {
+          $('#repeat').html("Turn Repeat On");
+        }
+        break;
+      case "username_list_update":
+      console.log(data.message_content);
+        $('#header_navbar').html(" {{url}} ("+data.message_content.length+" Online)");
+        $('#header_navbar').attr('title', data.message_content);
         break;
     };
 };
@@ -134,7 +176,7 @@
     player = new YT.Player('player', {
       height: '360',
       width: '640',
-      videoId: 'UBX8MWYel3s',
+      videoId: '{% if room.current_playlistItem.youtube_id %}{{ room.current_playlistItem.youtube_id }}{% else %}UBX8MWYel3s{% endif %}',
       playerVars: {'controls': 1 },
       events: {
         'onReady': onPlayerReady,
@@ -145,6 +187,12 @@
 
   function onPlayerReady(event) {
     event.target.playVideo();
+    var message = {
+        message_type: 'finished_loading',
+        message_content: '',
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
   }
 
   function onPlayerStateChange(event) {
