@@ -2542,7 +2542,7 @@ fieldset[disabled] a.btn {
 .btn-secondary:not([disabled]):not(.disabled):active, .btn-secondary:not([disabled]):not(.disabled).active,
 .show > .btn-secondary.dropdown-toggle {
   color: #fff;
-  background-color: #2b2a2a;
+  background-color: #2b2a2a;/*2b2a2a*/
   border-color: #242424;
   -webkit-box-shadow: 0 0 0 0.2rem rgba(68, 68, 68, 0.5);
           box-shadow: 0 0 0 0.2rem rgba(68, 68, 68, 0.5);

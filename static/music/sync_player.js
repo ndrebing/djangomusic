@@ -8,15 +8,17 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 $(document).ready(function() {
     $('#playlist').DataTable( {
-        //"searching":   false,
-        //"lengthChange": false,
-        //"info": false,
+        "lengthChange": false,
+        "info": false,
         "oLanguage": { "sEmptyTable": "Playlist is empty :(" }
     } );
 
     $("#player_tab_content").show();
     $("#playlist_tab_content").hide();
     $("#userlist_tab_content").hide();
+
+
+    $("#skip_vote_card").hide();
 
     $('#tab_button_player').attr('class', 'nav-link active');
     $('#tab_button_playlist').attr('class', 'nav-link');
@@ -35,7 +37,6 @@ function onYouTubeIframeAPIReady() {
 }
 
 function onPlayerReady(event) {
-  event.target.playVideo();
   var message = {
       message_type: 'ready',
       message_content: '',
@@ -48,6 +49,7 @@ function onPlayerStateChange(event) {
       message_type: 'player_state_change',
       message_content: event.data,
   };
+  //console.log("state:",event.data)
   socket.send(JSON.stringify(message));
 }
 
@@ -73,6 +75,10 @@ $('#tab_button_playlist').on('click', function(event) {
   $('#tab_button_users').attr('class', 'nav-link');
 });
 
+function updateVideoTitle() {
+
+};
+
 
 socket.onmessage = function(message) {
   var data = JSON.parse(message.data);
@@ -96,8 +102,10 @@ socket.onmessage = function(message) {
 
     case "play":
       var currently_loaded_id = player.getVideoData()['video_id'];
-      if (currently_loaded_id != data.message_content) {
-          player.loadVideoById(data.message_content);
+      if (currently_loaded_id != data.message_content[1]) {
+          updateVideoTitle(data.message_content[0]);
+          player.loadVideoById(data.message_content[1]);
+          console.log("alarmPlay");
       }
       player.playVideo();
       break;
@@ -105,14 +113,26 @@ socket.onmessage = function(message) {
 
     case "pause":
       var currently_loaded_id = player.getVideoData()['video_id'];
-      if (currently_loaded_id != data.message_content) {
-          player.loadVideoById(data.message_content);
+      if (currently_loaded_id != data.message_content[1]) {
+          updateVideoTitle(data.message_content[0]);
+          player.loadVideoById(data.message_content[1]);
+          console.log("alarmPlause");
       }
       player.pauseVideo();
       break;
 
     case "load":
+      updateVideoTitle(data.message_content[0]);
       player.loadVideoById(data.message_content);
+      break;
+
+    case "change":
+      for (var i = 0; i < data.message_content.length; i++) {
+        var tag_id = data.message_content[i][0];
+        var attr = data.message_content[i][1];
+        var val = data.message_content[i][2];
+        $('#'+tag_id).attr(attr, val);
+      }
       break;
 
     };
@@ -126,27 +146,27 @@ socket.onmessage = function(message) {
   }
 
 
-  $('#submit_link').on('click', function(event) {
+  $('#submit_link_button').on('click', function(event) {
     var message = {
         message_type: 'submit_url',
         message_content: link_parser($('#youtube_link').val()),
-    }
+    };
     socket.send(JSON.stringify(message));
     $('#youtube_link').val("");
   });
 
-  $('#shuffle').on('click', function(event) {
+  $('#shuffle_button').on('click', function(event) {
     var message = {
-        message_type: 'toggle_shuffle',
-        message_content: '',
-    }
+        message_type: 'toggle',
+        message_content: 'shuffle',
+    };
     socket.send(JSON.stringify(message));
   });
 
-  $('#repeat').on('click', function(event) {
+  $('#repeat_button').on('click', function(event) {
     var message = {
-        message_type: 'toggle_repeat',
-        message_content: '',
-    }
+        message_type: 'toggle',
+        message_content: 'repeat',
+    };
     socket.send(JSON.stringify(message));
   });
