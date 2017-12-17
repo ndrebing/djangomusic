@@ -7,12 +7,12 @@ from music.models import Profile
 
 @receiver(user_logged_in)
 def on_user_login(sender, **kwargs):
-    profile = Profile.objects.filter(user=kwargs.get('user'))
+    profile = Profile.objects.get(user=kwargs.get('user'))
     profile.is_logged_in = True
     profile.save()
 
 @receiver(user_logged_out)
 def on_user_logout(sender, **kwargs):
-    profile = Profile.objects.filter(user=kwargs.get('user'))
+    profile = Profile.objects.get(user=kwargs.get('user'))
     profile.is_logged_in = False
     profile.save()

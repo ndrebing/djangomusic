@@ -1,3 +1,199 @@
+{% block script %}
+<script>
+
+  $(document).ready(function() {
+    $('#playlist').DataTable( {
+        "searching":   false,
+        "lengthChange": false,
+        "info": false,
+        "oLanguage": { "sEmptyTable": "Playlist is empty :(" }
+    } );
+  } );
+
+  function link_parser(url){
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match&&match[7].length==11)? match[7] : url;
+  }
+
+  var socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/interface");
+
+  $('#submit_link').on('click', function(event) {
+    var message = {
+        message_type: 'submit_url',
+        message_content: link_parser($('#youtube_link').val()),
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+    $('#youtube_link').val("");
+  });
+
+  $('#shuffle').on('click', function(event) {
+    var message = {
+        message_type: 'toggle_shuffle',
+        message_content: '',
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  });
+
+  $('#repeat').on('click', function(event) {
+    var message = {
+        message_type: 'toggle_repeat',
+        message_content: '',
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  });
+
+  socket.onmessage = function(message) {
+    var data = JSON.parse(message.data);
+    switch(data.message_type) {
+      case "alert":
+        alert(data.message_content);
+        break;
+      case "append_to_playlist":
+        $("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
+        $('#playlist').DataTable().fnDraw();
+        break;
+      case "play":
+        player.playVideo();
+        break;
+      case "pause":
+        player.pauseVideo();
+        break;
+      case "seek":
+        // implement?
+        player.pauseVideo();
+        break;
+      case "load":
+        player.loadVideoById(data.message_content);
+        break;
+      case "change_shuffle_button":
+        if (data.message_content) {
+          $('#shuffle').html("Turn Shuffle Off");
+        }
+        else {
+          $('#shuffle').html("Turn Shuffle On");
+        }
+        break;
+      case "change_repeat_button":
+        if (data.message_content) {
+          $('#repeat').html("Turn Repeat Off");
+        }
+        else {
+          $('#repeat').html("Turn Repeat On");
+        }
+        break;
+      case "username_list_update":
+      console.log(data.message_content);
+        $('#header_navbar').html(" {{url}} ("+data.message_content.length+" Online)");
+        $('#header_navbar').attr('title', data.message_content);
+        break;
+    };
+};
+
+  var tag = document.createElement('script');
+
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '640',
+      videoId: '{% if room.current_playlistItem.youtube_id %}{{ room.current_playlistItem.youtube_id }}{% else %}UBX8MWYel3s{% endif %}',
+      playerVars: {'controls': 1 },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange,
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+    var message = {
+        message_type: 'finished_loading',
+        message_content: '',
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  }
+
+  function onPlayerStateChange(event) {
+    var message = {
+        message_type: 'player_state_change',
+        message_content: event.data,
+        message_origin: '{{ url }}',
+    };
+    socket.send(JSON.stringify(message));
+  }
+</script>
+{% endblock script %}
+
+
+#####################################
+
+<div class="container center" style="height: 70%; background:#303030; padding:2%;" >
+
+  <div class="row">
+    <div class="col">
+
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div id="player" class="auto-resizable-iframe"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+
+            <button class="btn btn-outline-warning my-2 my-sm-0" id="voteskip">Vote Skip</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" id="shuffle">Turn Shuffle {% if room.shuffle %}Off{% else %}On{% endif %}</button>
+            <button class="btn btn-outline-success my-2 my-sm-0" id="repeat">Turn Repeat {% if room.shuffle %}Off{% else %}On{% endif %}</button>
+            <div class="form-inline">
+              <input class="form-control" id="youtube_link" placeholder="Youtube link" style="margin: 5%;">
+              <button class="btn btn-outline-success my-2 my-sm-0" id="submit_link">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <table class="table table-sm" id="playlist">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 70%;" >Title</th>
+            <th scope="col" style="width: 20%;">Added by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in playlistItems %}
+              <tr>
+                <td><a href="https://www.youtube.com/watch?v={{item.youtube_id}}">{{ item.title }}</a></td>
+                <td>{{item.user_added.username}}</td>
+              </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+####################################################
+
+
+
+
 <div class="container center">
   <div class="row" >
   <div class="col-sm-8">
@@ -42,3 +238,92 @@
   </div>
 </div>
 </div>
+
+
+<script>
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  var player;
+  var socket = new WebSocket('ws://' + window.location.host + "/ws/{{url}}/playlist");
+
+  $(document).ready(function() {
+    $('#playlist').DataTable( {
+        "searching":   false,
+        "lengthChange": false,
+        "infoCallback": false,
+        "oLanguage": { "sEmptyTable": "Playlist is empty :(" },
+    } );
+  } );
+
+  function youtube_parser(url){
+    var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+    var match = url.match(regExp);
+    return (match&&match[7].length==11)? match[7] : url;
+  };
+
+  $('#submit_link').on('click', function(event) {
+    var message = {
+        message_type: 'submit_url',
+        message_content: youtube_parser($('#youtube_link').val()),
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  });
+
+  socket.onmessage = function(message) {
+    var data = JSON.parse(message.data);
+    switch(data.message_type) {
+      case "alert":
+        alert(data.message_content);
+        break;
+      case "append_to_playlist":
+        //$("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
+        //$("#playlist").append("<li class='list-group-item d-flex justify-content-between align-items-center '>"+data.message_content[0]+"<span class='badge badge-primary badge-pill'>"+data.message_content[2]+"</span></li>");
+        break;
+      case "play":
+        player.playVideo();
+        break;
+      case "pause":
+        player.pauseVideo();
+        break;
+      case "seek":
+        // implement?
+        player.pauseVideo();
+        break;
+      case "load":
+        player.loadVideoById(data.message_content);
+        break;
+    };
+};
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '360',
+      width: '640',
+      videoId: 'UBX8MWYel3s',
+      playerVars: {'controls': 1 },
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange,
+      }
+    });
+  }
+
+  // TODO ask server if play or pause
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+
+  function onPlayerStateChange(event) {
+    var message = {
+        message_type: 'player_state_change',
+        message_content: event.data,
+        message_origin: '{{ url }}',
+    }
+    socket.send(JSON.stringify(message));
+  }
+
+
+</script>
