@@ -12,6 +12,8 @@ def ws_connect(message):
 
     # Parse URL from connecting path
     room_url = message.content['path'].split("/")[2]
+    print("message.content['path']",  message.content['path'])
+    print("room_url",  room_url)
 
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
