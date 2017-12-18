@@ -7,6 +7,7 @@ from django.core import serializers
 from django.contrib.auth.models import User
 import logging
 from music.util import playerStates
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +124,51 @@ def ws_receive(message):
                 'message_content': "Invalid link " + str(possible_yt_id),
             })
 
+    elif data['message_type'] == "voteskip":
+        # get logged in users
+        user_id = submitting_user.id
+        vote_list = room.vote_skip_list
+        skip_val = False
+        # is user permitted to send to this room?
+        if(user_profile.last_room == room):
+            vote_list_parse = vote_list.split(';')
+            vote_cnt = len(vote_list_parse) - 1
+            print("lol")
+            if str(user_id) not in vote_list_parse:
+                print("lol2")
+                print("userid: " + str(user_id) )
+                vote_list += (str(user_id) + ";")
+                vote_cnt += 1
+
+                # update skiplist
+                room.vote_skip_list = vote_list
+                room.save()
+
+            #### skip condition, TODO: has ddos potential, save number of users in database
+            all_usernames = [p.user.username for p in Profile.objects.filter(last_room=room, is_logged_in=True)]
+            cnt = math.ceil(len(all_usernames) / 2)
+            if(vote_cnt >= cnt):
+                skip_val = True
+                pickNextSong(room)
+
+                date_str = room.current_playlistItem.added.strftime("%S:%M:%H %d.%m.%Y")
+                group_message(room.url, {
+                'message_type': 'voteskip',
+                'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
+                'skip': skip_val
+                })
+                return
+            #update counter
+            cnt_perc = math.ceil((vote_cnt / cnt)*100)
+            group_message(room.url, {
+            'message_type': "voteskip",
+            'votes_needed' : cnt,
+            'votes' : vote_cnt,
+            'votes_percent' : cnt_perc,
+            'skip': skip_val
+            })
+
+
     elif data['message_type'] == "ready":
         if room.current_playlistItem is not None:
             if room.is_playing:
@@ -130,7 +176,7 @@ def ws_receive(message):
             else:
                 message_type = "pause"
 
-            date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
+            date_str = room.current_playlistItem.added.strftime("%S:%M:%H %d.%m.%Y")
 
             group_message(room.url, {
                 'message_type': message_type,

@@ -104,6 +104,21 @@ socket.onmessage = function(message) {
       $('#playlist').DataTable().fnDraw();
       break;
 
+      case "voteskip":
+        var currently_loaded_id = player.getVideoData()['video_id'];
+        if (data.skip && currently_loaded_id != data.message_content[1]) {
+            updateVideoTitle(data.message_content[0]);
+            player.loadVideoById(data.message_content[1]);
+            $("#skip_vote_card").hide();
+            break;
+        }
+        $("#skip_vote_card").show();
+        $("#prog-bar").attr('aria-valuenow', data.votes_percent);
+        $("#prog-bar").attr('style', 'width: ' + data.votes_percent + '%');
+        $("#count").text('' + data.votes);
+        $("#count_need").text('' + data.votes_needed);
+        break;
+
     case "player":
       var currently_loaded_id = player.getVideoData()['video_id'];
       if (currently_loaded_id != data.message_content[1]) {
@@ -147,6 +162,13 @@ socket.onmessage = function(message) {
     };
     socket.send(JSON.stringify(message));
     $('#youtube_link').val("");
+  });
+
+  $('#voteskip_button').on('click', function (event) {
+      var message = {
+          message_type: 'voteskip',
+      };
+      socket.send(JSON.stringify(message));
   });
 
   $('#shuffle_button').on('click', function(event) {
