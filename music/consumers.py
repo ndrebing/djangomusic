@@ -12,14 +12,15 @@ logger = logging.getLogger(__name__)
 @channel_session_user_from_http
 def ws_connect(message):
 
-    # Parse URL from connecting path
-    room_url = message.content['path'].split("/")[2]
+
     try:
+        # Parse URL from connecting path
+        room_url = message.content['path'].split("/")[2]
         assert(len(room_url) == 8)
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
-    
+
     logger.error("message.content['path']" +  message.content['path'])
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
