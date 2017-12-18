@@ -5,16 +5,22 @@ from music.util import get_youtube_content_from_id, get_youtube_id, pickNextSong
 from .models import PlaylistItem, Room, Profile
 from django.core import serializers
 from django.contrib.auth.models import User
+import logging
 
+logger = logging.getLogger(__name__)
 
 @channel_session_user_from_http
 def ws_connect(message):
 
     # Parse URL from connecting path
     room_url = message.content['path'].split("/")[2]
-    print("message.content['path']",  message.content['path'])
-    print("room_url",  room_url)
-
+    try:
+        assert(len(room_url) == 8)
+    except:
+        logger.error("message.content['path']:" +message.content['path'])
+        return
+    
+    logger.error("message.content['path']" +  message.content['path'])
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
 

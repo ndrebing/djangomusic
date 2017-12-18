@@ -26,7 +26,6 @@ $(document).ready(function() {
 });
 
 function onYouTubeIframeAPIReady() {
-  console.log("player is ready")
   player = new YT.Player('player', {
     playerVars: {'controls': 1 },
     events: {
@@ -49,7 +48,6 @@ function onPlayerStateChange(event) {
       message_type: 'player_state_change',
       message_content: event.data,
   };
-  //console.log("state:",event.data)
   socket.send(JSON.stringify(message));
 }
 
@@ -82,7 +80,6 @@ function updateVideoTitle() {
 
 socket.onmessage = function(message) {
   var data = JSON.parse(message.data);
-  console.log("got message", data)
   switch(data.message_type) {
 
     case "alert":
@@ -105,7 +102,6 @@ socket.onmessage = function(message) {
       if (currently_loaded_id != data.message_content[1]) {
           updateVideoTitle(data.message_content[0]);
           player.loadVideoById(data.message_content[1]);
-          console.log("alarmPlay");
       }
       player.playVideo();
       break;
@@ -116,7 +112,6 @@ socket.onmessage = function(message) {
       if (currently_loaded_id != data.message_content[1]) {
           updateVideoTitle(data.message_content[0]);
           player.loadVideoById(data.message_content[1]);
-          console.log("alarmPlause");
       }
       player.pauseVideo();
       break;
