@@ -9,19 +9,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def get_room_url(message):
+    # Different when online/localhost
+    if "ws" in message.content['path']:
+        return message.content['path'][4:]
+    else:
+        return message.content['path'][1:]
+
 @channel_session_user_from_http
 def ws_connect(message):
-
-
     try:
         # Parse URL from connecting path
-        room_url = message.content['path'].split("/")[2]
+        room_url = get_room_url(message)
         assert(len(room_url) == 8)
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
 
-    logger.error("message.content['path']" +  message.content['path'])
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
 
@@ -34,7 +38,7 @@ def ws_connect(message):
 @channel_session_user
 def ws_disconnect(message):
     # Analog to connect
-    room_url = message.content['path'].split("/")[2]
+    room_url = get_room_url(message)
     Group(room_url).discard(message.reply_channel)
     send_room_update(room_url)
 
@@ -63,7 +67,7 @@ def ws_receive(message):
 
     submitting_user = message.user
     user_profile = Profile.objects.get(user=submitting_user)
-    room_url = message.content['path'].split("/")[2]
+    room_url = get_room_url(message)
     room = Room.objects.get(url=room_url)
 
     # Checking if valid
