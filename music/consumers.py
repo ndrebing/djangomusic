@@ -102,8 +102,21 @@ def ws_receive(message):
                 item = PlaylistItem.objects.create(youtube_id=possible_yt_id, title=yt_title, thumbnail_link=yt_thumbnail_url, user_added=submitting_user, room=user_profile.last_room)
                 group_message(room.url, {
                     'message_type': 'append_to_playlist',
-                    'message_content': [item.title, item.thumbnail_link, submitting_user.username, item.youtube_id, len(PlaylistItem.objects.all())],
+                    'message_content': [item.title, item.thumbnail_link, submitting_user.username, item.youtube_id, len(PlaylistItem.objects.filter(room=room).all())],
                 })
+                if len(PlaylistItem.objects.filter(room=user_profile.last_room)) == 1:
+                    room.current_playlistItem = item
+                    room.is_playing = True
+                    room.save()
+
+                    date_str = item.added.strftime("%Y-%m-%d %H:%M:%S")
+                    message_content = [[item.title, item.user_added.username, date_str], item.youtube_id, playerStates["wird wiedergegeben"]]
+                    group_message(room.url, {
+                        'message_type': "player",
+                        'message_content': message_content,
+                    })
+
+                    print("initnitnitni")
         else:
             return_message(message, {
                 'message_type': 'alert',
@@ -162,7 +175,6 @@ def ws_receive(message):
 
         if (room.current_playlistItem is not None) and target_player_state != "":
             date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
-            print("room.current_playlistItem.youtube_id",room.current_playlistItem.youtube_id)
             message_content = [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id, target_player_state]
             #print(target_player_state, message_type, message_content)
             group_message(room.url, {

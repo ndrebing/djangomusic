@@ -25,10 +25,10 @@ def get_youtube_content_from_id(id):
     try:
         data = urllib.request.urlopen(url).read().decode("utf8")
     except urllib.error.HTTPError as e:
-        print(e)
+
         return None, None
     except urllib.error.URLError as e:
-        print(e)
+
         return None, None
     else:
         try:
@@ -38,17 +38,16 @@ def get_youtube_content_from_id(id):
             yt_thumbnail_url = data['items'][0]['snippet']['thumbnails']['default']['url']
             assert(data['items'][0]['kind']=="youtube#video")
         except UnicodeEncodeError as e:
-            print(e)
+
             return "UnicodeEncodeError", "UnicodeEncodeError"
         except:
-            print("weird")
+
             return None, None
     return yt_title, yt_thumbnail_url
 
 
 def pickNextSong(room):
     if not room.shuffle:
-        print("Shuffle off")
         if room.current_playlistItem is None:
             new_id = PlaylistItem.objects.filter(room=room).order_by('added')[0].id
 
