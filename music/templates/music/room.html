@@ -4,6 +4,8 @@
 
 {% load staticfiles%}
 
+{% load random_numbers %}
+
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" data-toggle="tooltip" data-placement="bottom" data-html="true" title="" id="header_navbar" href="{{room.url}}">{{ room.url}}</a>
@@ -112,6 +114,7 @@
 {% block script %}
 <script>
     var room_url = "{{ room.url}}"
+    var start_youtube_id = "{{ room.current_playlistItem.youtube_id }}"
 </script>
-<script type="text/javascript" src="{% static "music/sync_player.js" %}"></script>
+<script type="text/javascript" src="{% static "music/sync_player.js" %}?v={% get_random_number %}"></script>
 {% endblock script %}

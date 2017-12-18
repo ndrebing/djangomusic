@@ -6,6 +6,7 @@ from .models import PlaylistItem, Room, Profile
 from django.core import serializers
 from django.contrib.auth.models import User
 import logging
+from music.util import playerStates
 
 logger = logging.getLogger(__name__)
 
@@ -48,16 +49,21 @@ def send_room_update(room_url):
     """
     room = Room.objects.get(url=room_url)
     all_usernames = [p.user.username for p in Profile.objects.filter(last_room=room, is_logged_in=True)]
-    send_message(room_url, {
+    group_message(room_url, {
         'message_type': 'username_list_update',
         'message_content': all_usernames,
     })
 
-def send_message(room_url, data):
+def group_message(room_url, data):
     """
     Sends data to room
     """
     Group(room_url).send({
+        'text': json.dumps(data)
+    })
+
+def return_message(message, data):
+    message.reply_channel.send({
         'text': json.dumps(data)
     })
 
@@ -72,7 +78,10 @@ def ws_receive(message):
 
     # Checking if valid
     # TODO necessary?
-    assert(user_profile.last_room == room)
+    try:
+        assert(user_profile.last_room == room)
+    except:
+        return
 
     if data['message_type'] == "submit_url":
         possible_yt_id = data['message_content']
@@ -84,21 +93,19 @@ def ws_receive(message):
                 item = None
 
             if item:
-                send_message(reply_id, {
+                return_message(message, {
                     'message_type': 'alert',
                     'message_content': yt_title + " has already been added by " + item.user_added.username,
                 })
-                print("already added")
                 pass
             else:
                 item = PlaylistItem.objects.create(youtube_id=possible_yt_id, title=yt_title, thumbnail_link=yt_thumbnail_url, user_added=submitting_user, room=user_profile.last_room)
-                # TODO alert users in room to add new playlist item
-                send_message(room.url, {
+                group_message(room.url, {
                     'message_type': 'append_to_playlist',
                     'message_content': [item.title, item.thumbnail_link, submitting_user.username, item.youtube_id, len(PlaylistItem.objects.all())],
                 })
         else:
-            send_message(room.url, {
+            return_message(message, {
                 'message_type': 'alert',
                 'message_content': "Invalid link " + str(possible_yt_id),
             })
@@ -111,7 +118,7 @@ def ws_receive(message):
 
         date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
 
-        send_message(room.url, {
+        group_message(room.url, {
             'message_type': message_type,
             'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
         })
@@ -131,29 +138,33 @@ def ws_receive(message):
         else:
             message_content = [[button_text, "class", "btn btn-secondary"], [button_text, "aria-pressed", "false"]]
 
-        send_message(room.url, {
+        group_message(room.url, {
             'message_type': "change",
             'message_content': message_content,
         })
 
     elif data['message_type'] == "player_state_change":
         player_state = data['message_content']
-        date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
-        message_content = [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id]
-        message_type = ""
-        if player_state == 0:
-            pickNextSong(room.url)
-            message_type = "play"
-        if player_state == 1:
-            message_type = "play"
-        elif player_state == 2:
-            message_type = "pause"
+        message_type = "player"
+        target_player_state = ""
+        if player_state == playerStates["beendet"]:
+            pickNextSong(room)
+            target_player_state = playerStates["wird wiedergegeben"]
+            room.is_playing = True
+        elif player_state == playerStates["wird wiedergegeben"]:
+            target_player_state = playerStates["wird wiedergegeben"]
+            room.is_playing = True
+        elif player_state == playerStates["pausiert"]:
+            target_player_state = playerStates["pausiert"]
             room.is_playing = False
-            room.save()
+        room.save()
 
-
-        if message_type != "":
-            send_message(room.url, {
+        if (room.current_playlistItem is not None) and target_player_state != "":
+            date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
+            print("room.current_playlistItem.youtube_id",room.current_playlistItem.youtube_id)
+            message_content = [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id, target_player_state]
+            #print(target_player_state, message_type, message_content)
+            group_message(room.url, {
                 'message_type': message_type,
                 'message_content': message_content,
             })

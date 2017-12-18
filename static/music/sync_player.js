@@ -2,6 +2,7 @@
 var socket = new WebSocket('ws://' + window.location.host + "/ws/" + room_url);
 var tag = document.createElement('script');
 var player;
+var target_player_state = null;
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
@@ -27,6 +28,7 @@ $(document).ready(function() {
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
+    videoId: start_youtube_id,
     playerVars: {'controls': 1 },
     events: {
       'onReady': onPlayerReady,
@@ -44,11 +46,16 @@ function onPlayerReady(event) {
 }
 
 function onPlayerStateChange(event) {
-  var message = {
-      message_type: 'player_state_change',
-      message_content: event.data,
-  };
-  socket.send(JSON.stringify(message));
+  if (target_player_state == null) {
+    var message = {
+        message_type: 'player_state_change',
+        message_content: event.data,
+    };
+    socket.send(JSON.stringify(message));
+    console.log("send", message);
+  } else if (player.getPlayerState() == target_player_state) {
+    target_player_state = null;
+  }
 }
 
 
@@ -97,28 +104,21 @@ socket.onmessage = function(message) {
       $('#playlist').DataTable().fnDraw();
       break;
 
-    case "play":
+    case "player":
       var currently_loaded_id = player.getVideoData()['video_id'];
       if (currently_loaded_id != data.message_content[1]) {
           updateVideoTitle(data.message_content[0]);
           player.loadVideoById(data.message_content[1]);
       }
-      player.playVideo();
-      break;
-
-
-    case "pause":
-      var currently_loaded_id = player.getVideoData()['video_id'];
-      if (currently_loaded_id != data.message_content[1]) {
-          updateVideoTitle(data.message_content[0]);
-          player.loadVideoById(data.message_content[1]);
+      if (data.message_content[2] != player.getPlayerState()) {
+        target_player_state =  data.message_content[2];
       }
-      player.pauseVideo();
-      break;
-
-    case "load":
-      updateVideoTitle(data.message_content[0]);
-      player.loadVideoById(data.message_content);
+      if (data.message_content[2] == YT.PlayerState.PLAYING) {
+        player.playVideo();
+      } else if (data.message_content[2] == YT.PlayerState.PAUSED) {
+        player.pauseVideo();
+      }
+      console.log("got",data.message_content);
       break;
 
     case "change":
@@ -129,7 +129,6 @@ socket.onmessage = function(message) {
         $('#'+tag_id).attr(attr, val);
       }
       break;
-
     };
   };
 
