@@ -111,17 +111,18 @@ def ws_receive(message):
             })
 
     elif data['message_type'] == "ready":
-        if room.is_playing:
-            message_type = "play"
-        else:
-            message_type = "pause"
+        if room.current_playlistItem is not None:
+            if room.is_playing:
+                message_type = "play"
+            else:
+                message_type = "pause"
 
-        date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
+            date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
 
-        group_message(room.url, {
-            'message_type': message_type,
-            'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
-        })
+            group_message(room.url, {
+                'message_type': message_type,
+                'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
+            })
 
     elif data['message_type'] == "toggle":
         button_type = data['message_content']

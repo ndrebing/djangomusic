@@ -5,6 +5,7 @@ from .models import Room, PlaylistItem
 import numpy as np
 import urllib.parse
 import urllib.request
+import urllib.error
 
 playerStates = {"nicht gestartet": -1 , "beendet": 0, "wird wiedergegeben": 1, "pausiert": 2, "wird gepuffert": 3, "Video positioniert": 5}
 
@@ -21,18 +22,28 @@ def get_youtube_id(url):
 def get_youtube_content_from_id(id):
     payload = {'part':'snippet', 'id': id, 'key': 'AIzaSyDDBk8tAkod1VRRNyFZF09fgQyMpnSe5HI'}
     url = "https://www.googleapis.com/youtube/v3/videos?" + urllib.parse.urlencode(payload)
-    data = urllib.request.urlopen(url)
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req) as response:
+    try:
+        data = urllib.request.urlopen(url).read().decode("utf8")
+    except urllib.error.HTTPError as e:
+        print(e)
+        return None, None
+    except urllib.error.URLError as e:
+        print(e)
+        return None, None
+    else:
         try:
-            data = json.loads(response.read())
+            data = json.loads(data)
+            print((data['items'][0]['snippet']['title']))
             yt_title = data['items'][0]['snippet']['title']
             yt_thumbnail_url = data['items'][0]['snippet']['thumbnails']['default']['url']
             assert(data['items'][0]['kind']=="youtube#video")
+        except UnicodeEncodeError as e:
+            print(e)
+            return "UnicodeEncodeError", "UnicodeEncodeError"
         except:
+            print("weird")
             return None, None
-        print(yt_title, yt_thumbnail_url)
-        return yt_title, yt_thumbnail_url
+    return yt_title, yt_thumbnail_url
 
 
 def pickNextSong(room):
