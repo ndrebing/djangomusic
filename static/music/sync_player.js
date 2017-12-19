@@ -21,9 +21,9 @@ $(document).ready(function() {
 
     $("#skip_vote_card").hide();
 
-    $('#tab_button_player').attr('class', 'nav-link active');
-    $('#tab_button_playlist').attr('class', 'nav-link');
-    $('#tab_button_users').attr('class', 'nav-link');
+    $('#button_player').attr('class', 'btn btn-primary');
+    $('#button_playlist').attr('class', 'btn btn-outline-primary');
+    $('#button_users').attr('class', 'btn btn-outline-primary disabled');
 });
 
 function onYouTubeIframeAPIReady() {
@@ -60,24 +60,24 @@ function onPlayerStateChange(event) {
 
 
 
-$('#tab_button_player').on('click', function(event) {
+$('#button_player').on('click', function(event) {
   $("#player_tab_content").show();
   $("#playlist_tab_content").hide();
   $("#userlist_tab_content").hide();
 
-  $('#tab_button_player').attr('class', 'nav-link active');
-  $('#tab_button_playlist').attr('class', 'nav-link');
-  $('#tab_button_users').attr('class', 'nav-link');
+  $('#button_player').attr('class', 'btn btn-primary');
+  $('#button_playlist').attr('class', 'btn btn-outline-primary');
+  $('#button_users').attr('class', 'btn btn-outline-primary disabled');
 });
 
-$('#tab_button_playlist').on('click', function(event) {
+$('#button_playlist').on('click', function(event) {
   $("#player_tab_content").hide();
   $("#playlist_tab_content").show();
   $("#userlist_tab_content").hide();
 
-  $('#tab_button_player').attr('class', 'nav-link');
-  $('#tab_button_playlist').attr('class', 'nav-link active');
-  $('#tab_button_users').attr('class', 'nav-link');
+  $('#button_player').attr('class', 'btn btn-outline-primary');
+  $('#button_playlist').attr('class', 'btn btn-primary');
+  $('#button_users').attr('class', 'btn btn-outline-primary disabled');
 });
 
 function updateVideoTitle() {
@@ -94,12 +94,12 @@ socket.onmessage = function(message) {
       break;
 
     case "username_list_update":
-      $('#header_navbar').html(room_url + " ("+data.message_content.length+" Online)");
-      $('#header_navbar').attr('title', data.message_content);
+      $('#button_users').html("Users("+data.message_content.length+")");
+      //$('#tab_button_users').attr('title', data.message_content);
       break;
 
     case "append_to_playlist":
-      $('#tab_button_playlist').html("Playlist("+data.message_content[4]+")");
+      $('#button_playlist').html("Playlist("+data.message_content[4]+")");
       $("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
       $('#playlist').DataTable().fnDraw();
       break;

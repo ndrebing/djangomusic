@@ -9,9 +9,11 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" data-toggle="tooltip" data-placement="bottom" data-html="true" title="" id="header_navbar" href="{{room.url}}">{{ room.url}}</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+  <button class="btn btn-primary" type="button" id="button_player">Video</button>
+  <button class="btn btn-outline-primary" type="button" id="button_playlist">Playlist({{playlistItems|length}})</button>
+  <button class="btn btn-outline-primary disabled" type="button" id="button_users">Users(0)</button>
+  <button class="btn btn-outline-primary disabled" type="button" id="button_playlist">Settings</button>
+
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item ">
@@ -20,23 +22,10 @@
     </ul>
   </div>
 </nav>
+
 <div class="container center" style="height: 75%;">
 
   <div class="card" style="height: 73%;">
-      <ul class="nav nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link " id="tab_button_player">Player</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="tab_button_playlist">Playlist({{playlistItems|length}})</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active" id="tab_button_users">Users</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="tab_button_settings">Room settings</a>
-        </li>
-      </ul>
 
     <div class="card-block">
       <div id="player_tab_content" >

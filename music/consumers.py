@@ -31,6 +31,11 @@ def ws_connect(message):
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
 
+    # Set login in db to keep online users up to date
+    profile = Profile.objects.get(user=message.user)
+    profile.is_logged_in = True
+    profile.save()
+
     # Add client to room group
     Group(room_url).add(message.reply_channel)
 
@@ -42,6 +47,9 @@ def ws_disconnect(message):
     # Analog to connect
     room_url = get_room_url(message)
     Group(room_url).discard(message.reply_channel)
+    profile = Profile.objects.get(user=message.user)
+    profile.is_logged_in = False
+    profile.save()
     send_room_update(room_url)
 
 def send_room_update(room_url):
