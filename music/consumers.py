@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def get_room_url(message):
     # Different when online/localhost
     if "ws" in message.content['path']:
-        return message.content['path'][3:]
+        return message.content['path'][4:]
     else:
         return message.content['path'][1:]
 
@@ -26,8 +26,7 @@ def ws_connect(message):
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
-    logger.error("room_url2:" +room_url+"----"+message.content['path'])
-    print("room_url2",room_url,message.content['path'])
+
     # if URL is invalid, dont return accept, room.html will return error to user
     if not url_is_valid(room_url):
         return
