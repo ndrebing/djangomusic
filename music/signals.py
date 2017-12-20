@@ -8,7 +8,7 @@ from music.util import playerStates, pickNextSong
 import math
 
 def send_room_update(room):
-    group_message(room_url, {
+    group_message(room.url, {
         'message_type': 'username_list_update',
         'message_content': [p.user.username for p in Profile.objects.filter(last_room=room, is_logged_in=True)],
     })

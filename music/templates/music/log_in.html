@@ -5,7 +5,9 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+
 <img src="https://wallpapers.wallhaven.cc/wallpapers/full/wallhaven-589843.jpg" class="img-fluid" alt="Responsive image">
+
 <div class="center form-group" style="width:20%;">
   <form action="{% url 'log_in' %}" method="post">
     {%csrf_token%}
