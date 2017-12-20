@@ -33,10 +33,10 @@ def get_youtube_content_from_id(id):
     else:
         try:
             data = json.loads(data)
-            print((data['items'][0]['snippet']['title']))
+            #print((data['items'][0]['snippet']['title']))
             yt_title = data['items'][0]['snippet']['title']
             yt_thumbnail_url = data['items'][0]['snippet']['thumbnails']['default']['url']
-            assert(data['items'][0]['kind']=="youtube#video")
+            #assert(data['items'][0]['kind']=="youtube#video")
         except UnicodeEncodeError as e:
 
             return "UnicodeEncodeError", "UnicodeEncodeError"
