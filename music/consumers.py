@@ -26,6 +26,8 @@ def ws_connect(message):
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
+    logger.error("room_url:" +room_url)
+    print("room_url",room_url)
     # if URL is invalid, dont return accept, room.html will return error to user
     if not url_is_valid(room_url):
         return
