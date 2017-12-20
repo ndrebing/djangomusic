@@ -74,8 +74,8 @@ $('#button_playlist').on('click', function(event) {
 });
 
 function updateVideoTitle(message_content) {
-  $("#video_title").text(message_content[0][0]);
-  $("#video_text").text("Added by "+message_content[0][1]+" ("+message_content[0][2]+")");
+  $("#video_title").text(message_content[0]);
+  $("#video_text").text("Added by "+message_content[1]+" ("+message_content[2]+")");
 };
 
 
