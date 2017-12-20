@@ -45,6 +45,8 @@ def get_youtube_content_from_id(id):
             return None, None
     return yt_title, yt_thumbnail_url
 
+def url_is_valid(url):
+    return not re.search(r'[^a-zA-Z0-9]', url)
 
 def pickNextSong(room):
     if not room.shuffle:

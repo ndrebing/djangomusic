@@ -17,6 +17,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import render, redirect
 from .models import genId
 from music.forms import SignUpForm, LogInForm
+from music.util import url_is_valid
 
 ###################################################################################################################################
 logger = logging.getLogger(__name__)
@@ -90,8 +91,8 @@ def user_list(request):
 
 @login_required(login_url='log_in')
 def room(request, url):
-    if(len(url)) > 25:
-         return HttpResponse("Room name too long (has to be less than 25)")
+    if not url_is_valid(url) or len(url) > 25 or len(url) < 3:
+        return HttpResponse("Room name invalid. Has to be 3 to 25 long and only a-z, A-Z, 0-9 is allowed")
 
     room, created = Room.objects.get_or_create(url=url)
     playlistItems = PlaylistItem.objects.filter(room=room).order_by('added')

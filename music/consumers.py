@@ -6,7 +6,7 @@ from .models import PlaylistItem, Room, Profile
 from django.core import serializers
 from django.contrib.auth.models import User
 import logging
-from music.util import playerStates
+from music.util import playerStates, url_is_valid
 import math
 
 logger = logging.getLogger(__name__)
@@ -26,6 +26,10 @@ def ws_connect(message):
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
+    # if URL is invalid, dont return accept, room.html will return error to user
+    if not url_is_valid(room_url):
+        return
+
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
 
