@@ -39,7 +39,7 @@ def get_youtube_content_from_id(id):
             #assert(data['items'][0]['kind']=="youtube#video")
         except UnicodeEncodeError as e:
 
-            return "UnicodeEncodeError", "UnicodeEncodeError"
+            return "UnicodeEncodeErrorTitle", "UnicodeEncodeErrorLink"
         except:
 
             return None, None
