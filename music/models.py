@@ -29,6 +29,7 @@ class Room(models.Model):
     repeat = models.BooleanField(default=False)
     is_playing = models.BooleanField(default=False)
     vote_skip_list = models.CharField(max_length=2000, default='')
+    vote_skip_rate = models.FloatField(default=0.67)
 
 class PlaylistItem(models.Model):
     youtube_id = models.CharField(max_length=20)

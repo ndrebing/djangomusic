@@ -56,10 +56,7 @@ def pickNextSong(room):
 
             new_id = valid_ids[valid_ids.index(room.current_playlistItem.id) + 1]
         else:
-            if not room.repeat:
-                new_id = None
-            else:
-                new_id = PlaylistItem.objects.filter(room=room).order_by('added')[0].id
+            new_id = PlaylistItem.objects.filter(room=room).order_by('added')[0].id
 
     else:
         while True:
@@ -74,4 +71,4 @@ def pickNextSong(room):
         room.current_playlistItem = None
 
     room.vote_skip_list = ""
-    room.save()
+    room.save(update_fields=["current_playlistItem", "vote_skip_list"])

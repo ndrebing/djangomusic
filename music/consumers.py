@@ -39,9 +39,6 @@ def ws_connect(message):
     # Add client to room group
     Group(room_url).add(message.reply_channel)
 
-    # Send update to room group to update user list
-    send_room_update(room_url)
-
 @channel_session_user
 def ws_disconnect(message):
     # Analog to connect
@@ -50,18 +47,6 @@ def ws_disconnect(message):
     profile = Profile.objects.get(user=message.user)
     profile.is_logged_in = False
     profile.save()
-    send_room_update(room_url)
-
-def send_room_update(room_url):
-    """
-    Sends profile list of all users of room to room
-    """
-    room = Room.objects.get(url=room_url)
-    all_usernames = [p.user.username for p in Profile.objects.filter(last_room=room, is_logged_in=True)]
-    group_message(room_url, {
-        'message_type': 'username_list_update',
-        'message_content': all_usernames,
-    })
 
 def group_message(room_url, data):
     """
@@ -80,8 +65,8 @@ def return_message(message, data):
 def ws_receive(message):
     data = json.loads(message['text'])
 
-    submitting_user = message.user
-    user_profile = Profile.objects.get(user=submitting_user)
+    user = message.user
+    user_profile = Profile.objects.get(user=user)
     room_url = get_room_url(message)
     room = Room.objects.get(url=room_url)
 
@@ -108,15 +93,15 @@ def ws_receive(message):
                 })
                 pass
             else:
-                item = PlaylistItem.objects.create(youtube_id=possible_yt_id, title=yt_title, thumbnail_link=yt_thumbnail_url, user_added=submitting_user, room=user_profile.last_room)
+                item = PlaylistItem.objects.create(youtube_id=possible_yt_id, title=yt_title, thumbnail_link=yt_thumbnail_url, user_added=user, room=user_profile.last_room)
                 group_message(room.url, {
                     'message_type': 'append_to_playlist',
-                    'message_content': [item.title, item.thumbnail_link, submitting_user.username, item.youtube_id, len(PlaylistItem.objects.filter(room=room).all())],
+                    'message_content': [item.title, item.thumbnail_link, user.username, item.youtube_id, len(PlaylistItem.objects.filter(room=room).all())],
                 })
                 if len(PlaylistItem.objects.filter(room=user_profile.last_room)) == 1:
                     room.current_playlistItem = item
                     room.is_playing = True
-                    room.save(update_fields=["is_playing"])
+                    room.save(update_fields=["current_playlistItem", "is_playing"])
 
         else:
             return_message(message, {
@@ -125,58 +110,29 @@ def ws_receive(message):
             })
 
     elif data['message_type'] == "voteskip":
-        # get logged in users
-        user_id = submitting_user.id
-        vote_list = room.vote_skip_list
-        skip_val = False
-        # is user permitted to send to this room?
         if(user_profile.last_room == room):
-            vote_list_parse = vote_list.split(';')
-            vote_cnt = len(vote_list_parse) - 1
-            print("lol")
-            if str(user_id) not in vote_list_parse:
-                print("lol2")
-                print("userid: " + str(user_id) )
-                vote_list += (str(user_id) + ";")
-                vote_cnt += 1
+            if str(user.id) not in room.vote_skip_list.split(';'):
+                room.vote_skip_list += (str(user.id) + ";")
+                room.save(update_fields=["vote_skip_list"])
+                votes_given = len(room.vote_skip_list.split(";")) - 1
+                votes_needed = math.ceil(len(Profile.objects.filter(last_room=room, is_logged_in=True)) * room.vote_skip_rate)
 
-                # update skiplist
-                room.vote_skip_list = vote_list
-                room.save()
+                print("BBBB room.vote_skip_list", room.vote_skip_list, "given",votes_given, "votes_needed", votes_needed, "online", len(Profile.objects.filter(last_room=room, is_logged_in=True)), "room.vote_skip_list.split()", room.vote_skip_list.split(";"))
 
-            #### skip condition, TODO: has ddos potential, save number of users in database
-            all_usernames = [p.user.username for p in Profile.objects.filter(last_room=room, is_logged_in=True)]
-            cnt = math.ceil(len(all_usernames) / 2)
-            if(vote_cnt >= cnt):
-                skip_val = True
-                pickNextSong(room)
+                if(votes_given >= votes_needed):
+                    pickNextSong(room)
 
-                date_str = room.current_playlistItem.added.strftime("%S:%M:%H %d.%m.%Y")
-                group_message(room.url, {
-                'message_type': 'voteskip',
-                'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
-                'skip': skip_val
-                })
-                return
-            #update counter
-            cnt_perc = math.ceil((vote_cnt / cnt)*100)
-            group_message(room.url, {
-            'message_type': "voteskip",
-            'votes_needed' : cnt,
-            'votes' : vote_cnt,
-            'votes_percent' : cnt_perc,
-            'skip': skip_val
-            })
+
 
 
     elif data['message_type'] == "ready":
         if room.current_playlistItem is not None:
-            
+
             if room.is_playing:
                 message_type = "play"
             else:
                 message_type = "pause"
-                
+
             return_message(message, {
                 'message_type': message_type,
                 'message_content': None,
@@ -190,21 +146,21 @@ def ws_receive(message):
             room.shuffle = not room.shuffle
         elif button_type == "repeat":
             room.repeat = not room.repeat
-            
         room.save(update_fields=[button_type])
 
     elif data['message_type'] == "player_state_change":
         player_state = data['message_content']
-              
+        update_fields = []
         if player_state == playerStates["beendet"]:
             pickNextSong(room)
             room.is_playing = True
+            update_fields = ["is_playing", "current_playlistItem"]
         elif player_state == playerStates["wird wiedergegeben"]:
             room.is_playing = True
+            update_fields = ["is_playing"]
         elif player_state == playerStates["pausiert"]:
             room.is_playing = False
+            update_fields = ["is_playing"]
         else:
             return
-            
-        room.save(update_fields=["is_playing"])
-        
+        room.save(update_fields=update_fields)

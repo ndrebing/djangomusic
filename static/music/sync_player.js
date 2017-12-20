@@ -46,7 +46,6 @@ function onPlayerStateChange(event) {
         message_content: event.data,
     };
     socket.send(JSON.stringify(message));
-    console.log("send", message);
   } else if (player.getPlayerState() == target_player_state) {
     target_player_state = null;
   }
@@ -74,13 +73,15 @@ $('#button_playlist').on('click', function(event) {
   $('#button_users').attr('class', 'btn btn-outline-primary disabled');
 });
 
-function updateVideoTitle() {
-
+function updateVideoTitle(message_content) {
+  $("#video_title").text(message_content[0][0]);
+  $("#video_text").text("Added by "+message_content[0][1]+" ("+message_content[0][2]+")");
 };
 
 
 socket.onmessage = function(message) {
   var data = JSON.parse(message.data);
+  console.log(data);
   switch(data.message_type) {
 
     case "alert":
@@ -102,23 +103,22 @@ socket.onmessage = function(message) {
       if (username.length > 10) {
         username = username.substring(0,7) + "...";
       }
-
       $("#playlist").append("<li class='media list-group-item d-flex justify-content-between align-items-center' style='border: 0px;'><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'><img class='mr-3' src='"+data.message_content[1]+"' style='height:50px;'></a><div class='media-body'><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'><h6 class='mt-0 mb-1'>"+title+"</div><span class='badge badge-info badge-pill'>"+username+"</span></li>");
       break;
 
       case "voteskip":
-        var currently_loaded_id = player.getVideoData()['video_id'];
-        if (data.skip && currently_loaded_id != data.message_content[1]) {
-            updateVideoTitle(data.message_content[0]);
-            player.loadVideoById(data.message_content[1]);
+        var votes_given = data.message_content[0]
+        var votes_needed = data.message_content[1]
+        var percentage = Math.ceil((votes_given / votes_needed)*100)
+        if (votes_given == 0) {
             $("#skip_vote_card").hide();
-            break;
+        } else {
+          $("#skip_vote_card").show();
+          $("#prog-bar").attr('aria-valuenow', percentage);
+          $("#prog-bar").attr('style', 'width: ' + percentage + '%');
+          $("#count").text('' + votes_given);
+          $("#count_need").text('' + votes_needed);
         }
-        $("#skip_vote_card").show();
-        $("#prog-bar").attr('aria-valuenow', data.votes_percent);
-        $("#prog-bar").attr('style', 'width: ' + data.votes_percent + '%');
-        $("#count").text('' + data.votes);
-        $("#count_need").text('' + data.votes_needed);
         break;
 
     case "player":
@@ -126,6 +126,8 @@ socket.onmessage = function(message) {
       if (currently_loaded_id != data.message_content[1]) {
           updateVideoTitle(data.message_content[0]);
           player.loadVideoById(data.message_content[1]);
+          $("#skip_vote_card").hide();
+          console.log("changefd vid");
       }
       if (data.message_content[2] != player.getPlayerState()) {
         target_player_state =  data.message_content[2];
@@ -135,14 +137,14 @@ socket.onmessage = function(message) {
       } else if (data.message_content[2] == YT.PlayerState.PAUSED) {
         player.pauseVideo();
       }
-      console.log("got",data.message_content);
       break;
-      
+
     case "play":
         player.playVideo();
+        break;
     case "pause":
         player.pauseVideo();
-
+        break;
     case "change":
       for (var i = 0; i < data.message_content.length; i++) {
         var tag_id = data.message_content[i][0];
