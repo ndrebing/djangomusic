@@ -104,9 +104,9 @@ def ws_receive(message):
                     'message_content': [item.title, item.thumbnail_link, user.username, item.youtube_id, len(PlaylistItem.objects.filter(room=room).all())],
                 })
                 if len(PlaylistItem.objects.filter(room=user_profile.last_room)) == 1:
-                    room.current_playlistItem = item
+                    pickNextSong(room)
                     room.is_playing = True
-                    room.save(update_fields=["current_playlistItem", "is_playing"])
+                    room.save(update_fields=["is_playing"])
 
         else:
             return_message(message, {

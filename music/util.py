@@ -62,13 +62,21 @@ def pickNextSong(room):
 
     else:
         while True:
-            valid_ids = [x['id'] for x in PlaylistItem.objects.filter(room=room).values('id')]
+            valid_ids = [x['id'] for x in PlaylistItem.objects.filter(room=room,playcount=0).values('id')]
+
+            if not valid_ids or room.repeat:
+                PlaylistItem.objects.filter(room=room).update(playcount=0)
+                valid_ids = [x['id'] for x in PlaylistItem.objects.filter(room=room).values('id')]
+                
             new_id = np.random.choice(valid_ids,1)[0]
+
             if new_id != room.current_playlistItem.id:
                 break
 
     if new_id is not None:
         room.current_playlistItem = PlaylistItem.objects.filter(room=room).get(id=new_id)
+        room.current_playlistItem.playcount += 1
+        room.current_playlistItem.save()
     else:
         room.current_playlistItem = None
 

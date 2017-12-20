@@ -37,6 +37,7 @@ class PlaylistItem(models.Model):
     thumbnail_link = models.CharField(max_length=200, default="")
     last_played = models.DateTimeField(blank=True, null=True)
     added = models.DateTimeField(auto_now_add=True)
+    playcount = models.IntegerField(default=0)
     user_added = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey("Room", related_name="playlist_item_room", on_delete=models.CASCADE)
 
