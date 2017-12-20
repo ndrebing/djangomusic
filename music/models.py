@@ -23,7 +23,7 @@ def genId(length=8):
     return hash_value
 
 class Room(models.Model):
-    url = models.CharField(max_length=8, default=genId, unique=True, primary_key=True)
+    url = models.CharField(max_length=25, default=genId, unique=True, primary_key=True)
     current_playlistItem = models.ForeignKey("PlaylistItem", related_name="current_playlistItem", on_delete=models.CASCADE, blank=True, null=True)
     shuffle = models.BooleanField(default=False)
     repeat = models.BooleanField(default=False)

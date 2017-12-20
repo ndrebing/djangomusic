@@ -8,6 +8,6 @@ urlpatterns = [
     path('log_in', views.log_in, name='log_in'),
     path('log_out', views.log_out, name='log_out'),
     path('sign_up', views.sign_up, name='sign_up'),
-    path('<str:url>', views.room, name='room'),
+    path('r/<str:url>', views.room, name='room'),
     #re_path('(?P<url>^[\d\w]{8}$)', views.room, name='room'),
 ]

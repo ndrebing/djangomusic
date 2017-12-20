@@ -37,9 +37,9 @@ def log_in(request):
                 # Send user to last_room or generate a new one if new user
                 profile = Profile.objects.get(user=user)
                 if profile.last_room is not None:
-                    return HttpResponseRedirect(profile.last_room.url)
+                    return HttpResponseRedirect("r/"+profile.last_room.url)
                 else:
-                    return HttpResponseRedirect(str(genId()))
+                    return HttpResponseRedirect("r/"+str(genId()))
             return HttpResponse("Invalid username or password")
 
         else:
@@ -65,11 +65,16 @@ def sign_up(request):
                 return HttpResponse("Passwords are not the same")
 
             # TODO only allow long passwords?
+            if data['email'] is not None and len(data['email']) > 3:
 
-            if User.objects.filter(email=data['email']).exists():
-                return HttpResponse("Your email is already in use")
+                if User.objects.filter(email=data['email']).exists():
+                    return HttpResponse("Your email is already in use")
 
-            user = User.objects.create_user(data['username'], data['email'] , data['password'])
+                user = User.objects.create_user(data['username'], data['email'] , data['password'])
+            else:
+                user = User.objects.create_user(username=data['username'], password=data['password'])
+
+
             return HttpResponseRedirect("log_in")
         else:
             return HttpResponse(str(form.errors))
@@ -85,6 +90,9 @@ def user_list(request):
 
 @login_required(login_url='log_in')
 def room(request, url):
+    if(len(url)) > 25:
+         return HttpResponse("Room name too long (has to be less than 25)")
+
     room, created = Room.objects.get_or_create(url=url)
     playlistItems = PlaylistItem.objects.filter(room=room).order_by('added')
     profile = Profile.objects.get(user=request.user)

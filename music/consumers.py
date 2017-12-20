@@ -16,18 +16,16 @@ def get_room_url(message):
     if "ws" in message.content['path']:
         return message.content['path'][4:]
     else:
-        return message.content['path'][1:]
+        return message.content['path'][2:]
 
 @channel_session_user_from_http
 def ws_connect(message):
     try:
         # Parse URL from connecting path
         room_url = get_room_url(message)
-        assert(len(room_url) == 8)
     except:
         logger.error("message.content['path']:" +message.content['path'])
         return
-
     # Send accept (Triggers connect on client side)
     message.reply_channel.send({"accept": True})
 
