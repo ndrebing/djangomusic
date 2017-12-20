@@ -73,9 +73,11 @@ $('#button_playlist').on('click', function(event) {
   $('#button_users').attr('class', 'btn btn-outline-primary disabled');
 });
 
-function updateVideoTitle(message_content) {
+function updateVideoTitle(message_content, id) {
   $("#video_title").text(message_content[0]);
   $("#video_text").text("Added by "+message_content[1]+" ("+message_content[2]+")");
+  $("li").removeClass("active");
+  $("a[href$='"+id+"']").parent().addClass("active");
 };
 
 
@@ -124,7 +126,7 @@ socket.onmessage = function(message) {
     case "player":
       var currently_loaded_id = player.getVideoData()['video_id'];
       if (currently_loaded_id != data.message_content[1]) {
-          updateVideoTitle(data.message_content[0]);
+          updateVideoTitle(data.message_content[0], data.message_content[1]);
           player.loadVideoById(data.message_content[1]);
           $("#skip_vote_card").hide();
           console.log("changefd vid");
