@@ -137,6 +137,11 @@ socket.onmessage = function(message) {
       }
       console.log("got",data.message_content);
       break;
+      
+    case "play":
+        player.playVideo();
+    case "pause":
+        player.pauseVideo();
 
     case "change":
       for (var i = 0; i < data.message_content.length; i++) {

@@ -116,16 +116,8 @@ def ws_receive(message):
                 if len(PlaylistItem.objects.filter(room=user_profile.last_room)) == 1:
                     room.current_playlistItem = item
                     room.is_playing = True
-                    room.save()
+                    room.save(update_fields=["is_playing"])
 
-                    date_str = item.added.strftime("%Y-%m-%d %H:%M:%S")
-                    message_content = [[item.title, item.user_added.username, date_str], item.youtube_id, playerStates["wird wiedergegeben"]]
-                    group_message(room.url, {
-                        'message_type': "player",
-                        'message_content': message_content,
-                    })
-
-                    print("initnitnitni")
         else:
             return_message(message, {
                 'message_type': 'alert',
@@ -179,16 +171,15 @@ def ws_receive(message):
 
     elif data['message_type'] == "ready":
         if room.current_playlistItem is not None:
+            
             if room.is_playing:
                 message_type = "play"
             else:
                 message_type = "pause"
-
-            date_str = room.current_playlistItem.added.strftime("%S:%M:%H %d.%m.%Y")
-
-            group_message(room.url, {
+                
+            return_message(message, {
                 'message_type': message_type,
-                'message_content': [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id],
+                'message_content': None,
             })
 
     elif data['message_type'] == "toggle":
@@ -199,39 +190,21 @@ def ws_receive(message):
             room.shuffle = not room.shuffle
         elif button_type == "repeat":
             room.repeat = not room.repeat
-        room.save()
-
-        if (room.shuffle and button_type == "shuffle") or (room.repeat and button_type == "repeat"):
-            message_content = [[button_text, "class", "btn btn-primary active"], [button_text, "aria-pressed", "true"]]
-        else:
-            message_content = [[button_text, "class", "btn btn-secondary"], [button_text, "aria-pressed", "false"]]
-
-        group_message(room.url, {
-            'message_type': "change",
-            'message_content': message_content,
-        })
+            
+        room.save(update_fields=[button_type])
 
     elif data['message_type'] == "player_state_change":
         player_state = data['message_content']
-        message_type = "player"
-        target_player_state = ""
+              
         if player_state == playerStates["beendet"]:
             pickNextSong(room)
-            target_player_state = playerStates["wird wiedergegeben"]
             room.is_playing = True
         elif player_state == playerStates["wird wiedergegeben"]:
-            target_player_state = playerStates["wird wiedergegeben"]
             room.is_playing = True
         elif player_state == playerStates["pausiert"]:
-            target_player_state = playerStates["pausiert"]
             room.is_playing = False
-        room.save()
-
-        if (room.current_playlistItem is not None) and target_player_state != "":
-            date_str = room.current_playlistItem.added.strftime("%Y-%m-%d %H:%M:%S")
-            message_content = [[room.current_playlistItem.title, room.current_playlistItem.user_added.username, date_str], room.current_playlistItem.youtube_id, target_player_state]
-            #print(target_player_state, message_type, message_content)
-            group_message(room.url, {
-                'message_type': message_type,
-                'message_content': message_content,
-            })
+        else:
+            return
+            
+        room.save(update_fields=["is_playing"])
+        

@@ -9,12 +9,12 @@
 {% block content %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" data-toggle="tooltip" data-placement="bottom" data-html="true" title="" id="header_navbar" href="{{room.url}}">{{ room.url}}</a>
-  <div class="btn-group">
+  <!-- <div class="btn-group">
     <button class="btn btn-primary" type="button" id="button_player">Video</button>
     <button class="btn btn-outline-primary" type="button" id="button_playlist">Playlist({{playlistItems|length}})</button>
     <button class="btn btn-outline-primary disabled" type="button" id="button_users">Users(0)</button>
     <button class="btn btn-outline-primary disabled" type="button" id="button_playlist">Settings</button>
-  </div>
+  </div> -->
   <div class="collapse navbar-collapse" id="navbarNavDropdown">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item ">
@@ -32,7 +32,7 @@
       <div class="col-7">
 
         <!--  Video  -->
-          <div class="card">
+          <div class="card" style="height:500px; overflow:hidden;">
             <div class="card-body">
               <img class="card-img-top" id="player">
               <div class="card-body">
@@ -53,7 +53,7 @@
           </div>
 
           <!--  Controls  -->
-          <div class="card">
+          <div class="card" style="height:100px; overflow:hidden;">
             <div class="card-body">
               <h6 class="card-subtitle mb-2 text-muted">Controls</h6>
                 <div class="form-row">
@@ -89,7 +89,7 @@
             </div>
 
 
-            <div class="card">
+            <div class="card" style="height:100px; overflow:hidden;">
               <div class="card-body">
                 <div class="card-text">
                   <div class="form-inline">
