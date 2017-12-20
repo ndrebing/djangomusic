@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def get_room_url(message):
     # Different when online/localhost
     if "ws" in message.content['path']:
-        return message.content['path'][4:]
+        return message.content['path'][6:]
     else:
         return message.content['path'][2:]
 
@@ -70,6 +70,8 @@ def ws_receive(message):
     user = message.user
     user_profile = Profile.objects.get(user=user)
     room_url = get_room_url(message)
+    if not url_is_valid(room_url):
+        return
     room = Room.objects.get(url=room_url)
 
     # Checking if valid
