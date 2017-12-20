@@ -37,7 +37,9 @@
               <img class="card-img-top" id="player">
               <div class="card-body">
                 <h4 class="card-title" id="video_title">{%if playlistItems|length > 0%}{{room.current_playlistItem.title}}{%else%}Playlist is empty{%endif%}</h4>
-                <p class="card-text" id="video_text">{%if playlistItems|length > 0%}Added by {{room.current_playlistItem.user_added.username}} ({{room.current_playlistItem.added|date:"m.d.Y, H:i"}}){%endif%}</p>
+                <p class="card-text" id="video_text">
+                  {%if playlistItems|length > 0%}Added by {{room.current_playlistItem.user_added.username}} ({{room.current_playlistItem.added|date:"m.d.Y, H:i"}}){%endif%}
+                </p>
               </div>
             </div>
           </div>
@@ -74,6 +76,7 @@
 
           <div class="card"  style="height:500px; overflow-y:auto;">
               <div class="card-body">
+                <h4 class="card-title" id="playlist_title">Playlist({{playlistItems|length}})</h4>
                   <ul class="list-group" id="playlist">
                       {% for item in playlistItems %}
                           <li class="media list-group-item d-flex justify-content-between align-items-center {% if room.current_playlistItem == item%}active{%endif%}" style="border: 0px;">

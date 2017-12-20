@@ -12,7 +12,7 @@ $(document).ready(function() {
     $("#playlist_tab_content").hide();
     $("#userlist_tab_content").hide();
 
-
+    $('[data-toggle="popover"]').popover()
     $("#skip_vote_card").hide();
 
     $('#button_player').attr('class', 'btn btn-primary');
@@ -96,7 +96,7 @@ socket.onmessage = function(message) {
       break;
 
     case "append_to_playlist":
-      $('#button_playlist').html("Playlist("+data.message_content[4]+")");
+      $('#playlist_title').text("Playlist("+data.message_content[4]+")");
       title = data.message_content[0];
       if (title.length > 50) {
         title = title.substring(0,47) + "...";
