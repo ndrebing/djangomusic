@@ -24,97 +24,86 @@
   </div>
 </nav>
 
-<div class="container center" style="height: 75%;">
+<div class="container" style="margin-top: 3%; height:70%;">
 
-  <div class="card" style="height: 73%;">
+    <div class="row">
 
-    <div class="card-block">
-      <div id="player_tab_content" >
-        <img class="card-img-top" id="player" alt="Card image cap">
-        <div class="card-body">
-          <div class="container">
-            <div class="row">
-              <div class="col-8">
+      <!-- ############################### PLAYER ############################### -->
+      <div class="col-7">
+
+        <!--  Video  -->
+          <div class="card">
+            <div class="card-body">
+              <img class="card-img-top" id="player">
+              <div class="card-body">
                 <h4 class="card-title" id="video_title">{%if playlistItems|length > 0%}{{room.current_playlistItem.title}}{%else%}Playlist is empty{%endif%}</h4>
                 <p class="card-text" id="video_text">{%if playlistItems|length > 0%}Added by {{room.current_playlistItem.user_added.username}} ({{room.current_playlistItem.added|date:"m.d.Y, H:i"}}){%endif%}</p>
               </div>
-              <div class="col">
-                <label for="inlineFormInputGroup">Share</label>
-                <div class="input-group mb-2 mb-sm-0">
+            </div>
+          </div>
 
-                  <input type="text" class="form-control" id="inlineFormInputGroup" value="http://music.ndrebing.de/{{room.url}}" onclick="this.select();document.execCommand('copy');">
-                  <button class="btn btn-primary" type="button" id="button_player" onclick="$('#inlineFormInputGroup').select();document.execCommand('copy');">Copy</button>
-                </div>
+          <!--  Voteskip  -->
+          <div class="card" id="skip_vote_card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted" id="counter">Skip Votes <label id="count">0</label> / <label id="count_need">0</label></h6>
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 75%" id="prog-bar"></div>
               </div>
             </div>
           </div>
-        </div>
+
+          <!--  Controls  -->
+          <div class="card">
+            <div class="card-body">
+              <h6 class="card-subtitle mb-2 text-muted">Controls</h6>
+                <div class="form-row">
+                  <div class="col-8">
+                    <button class="btn btn-primary" id="voteskip_button">Vote Skip</button>
+                    <button data-toggle="button" aria-pressed="{% if room.shuffle %}true{% else %}false{% endif%}" autocomplete="off" class="btn btn-{% if room.shuffle %}primary active{% else %}secondary{% endif%}" id="shuffle_button">Shuffle</button>
+                    <button data-toggle="button" aria-pressed="{% if room.shuffle %}true{% else %}false{% endif%}" autocomplete="off" class="btn btn-{% if room.repeat %}primary active{% else %}secondary{% endif%}" id="repeat_button"> Repeat</button>
+                  </div>
+                </div>
+            </div>
+          </div>
+
       </div>
 
+      <!-- ############################### PLAYLIST ############################### -->
+
+        <div class="col-5" >
+
+          <div class="card"  style="height:500px; overflow-y:auto;">
+              <div class="card-body">
+                  <ul class="list-group" id="playlist">
+                      {% for item in playlistItems %}
+                          <li class="media list-group-item d-flex justify-content-between align-items-center {% if room.current_playlistItem == item%}active{%endif%}" style="border: 0px;">
+                              <a href="https://www.youtube.com/watch?v={{item.youtube_id}}"><img class="mr-3" src="{{item.thumbnail_link}}" style="height:50px;"></a>
+                              <div class="media-body">
+                                  <a href="https://www.youtube.com/watch?v={{item.youtube_id}}"><h6 class="mt-0 mb-1">{{ item.title|truncatechars:50 }}</h6></a>
+                              </div>
+                              <span class="badge badge-info badge-pill">{{item.user_added.username|truncatechars:10}}</span>
+                          </li>
+                      {% endfor %}
+                  </ul>
+              </div>
+            </div>
 
 
-
-      <div id="playlist_tab_content">
-        <p>
-        <table class="table table-sm" id="playlist">
-          <thead>
-            <tr>
-              <th scope="col" style="width: 60%;" >Title</th>
-              <th scope="col" style="width: 20%;">Added by</th>
-              <th scope="col" style="width: 20%;">Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in playlistItems %}
-                <tr>
-                  <td><a href="https://www.youtube.com/watch?v={{item.youtube_id}}">{{ item.title }}</a></td>
-                  <td>{{item.user_added.username}}</td>
-                  <td>{{item.added|date:"m.d.Y, H:i"}}</td>
-                </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div id="userlist_tab_content">
-
+            <div class="card">
+              <div class="card-body">
+                <div class="card-text">
+                  <div class="form-inline">
+                    <input type="text" class="form-control" placeholder="Youtube link" id="youtube_link">
+                    <button class="btn btn-primary" id="submit_link_button" style="margin-left: 3%;">Submit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
       </div>
     </div>
-  </div>
-
-  <div class="card" id="skip_vote_card">
-    <div class="card-body">
-      <h6 class="card-subtitle mb-2 text-muted" id="counter">Skip Votes <label id="count">0</label> / <label id="count_need">0</label></h6>
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 75%" id="prog-bar"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <h6 class="card-subtitle mb-2 text-muted">Controls</h6>
-        <div class="form-row">
-          <div class="col-8">
-            <button class="btn btn-primary" id="voteskip_button">Vote Skip</button>
-            <button data-toggle="button" aria-pressed="{% if room.shuffle %}true{% else %}false{% endif%}" autocomplete="off" class="btn btn-{% if room.shuffle %}primary active{% else %}secondary{% endif%}" id="shuffle_button">Shuffle</button>
-            <button data-toggle="button" aria-pressed="{% if room.shuffle %}true{% else %}false{% endif%}" autocomplete="off" class="btn btn-{% if room.repeat %}primary active{% else %}secondary{% endif%}" id="repeat_button"> Repeat</button>
-          </div>
-          <div class="col">
-            <input type="text" class="form-control" placeholder="Youtube link" id="youtube_link">
-          </div>
-          <div class="col">
-            <button class="btn btn-primary" id="submit_link_button">Submit</button>
-          </div>
-        </div>
-    </div>
-  </div>
-
-
-
-
-
 </div>
+
+
 
 {% endblock content %}
 

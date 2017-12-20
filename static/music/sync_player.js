@@ -8,12 +8,6 @@ var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 $(document).ready(function() {
-    $('#playlist').DataTable( {
-        "lengthChange": false,
-        "info": false,
-        "oLanguage": { "sEmptyTable": "Playlist is empty :(" }
-    } );
-
     $("#player_tab_content").show();
     $("#playlist_tab_content").hide();
     $("#userlist_tab_content").hide();
@@ -100,8 +94,16 @@ socket.onmessage = function(message) {
 
     case "append_to_playlist":
       $('#button_playlist').html("Playlist("+data.message_content[4]+")");
-      $("#playlist").append("<tr><td ><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'>"+data.message_content[0]+"</a></td><td>"+data.message_content[2]+"</td></tr>");
-      $('#playlist').DataTable().fnDraw();
+      title = data.message_content[0];
+      if (title.length > 50) {
+        title = title.substring(0,47) + "...";
+      }
+      username = data.message_content[2];
+      if (username.length > 10) {
+        username = username.substring(0,7) + "...";
+      }
+
+      $("#playlist").append("<li class='media list-group-item d-flex justify-content-between align-items-center' style='border: 0px;'><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'><img class='mr-3' src='"+data.message_content[1]+"' style='height:50px;'></a><div class='media-body'><a href='https://www.youtube.com/watch?v="+data.message_content[3]+"'><h6 class='mt-0 mb-1'>"+title+"</div><span class='badge badge-info badge-pill'>"+username+"</span></li>");
       break;
 
       case "voteskip":
